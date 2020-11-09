@@ -193,6 +193,8 @@ GzRender::GzRender(int xRes, int yRes) : xres(xRes), yres(yRes)
 	 */
 	framebuffer = new char[xRes*yRes * 3];
 	pixelbuffer = new GzPixel[xRes * yRes]; //Allocate Pixelbuffer memory
+	//tribuffer = new Gz_Tridata[???] //Allocate tri memory
+
 
 /* HW 3.6
 - setup Xsp and anything only done once
@@ -201,15 +203,6 @@ GzRender::GzRender(int xRes, int yRes) : xres(xRes), yres(yRes)
 //Initialize variables
 	matlevel = 0;
 	numlights = 0;
-
-
-	//Initialize matrices
-	MatrixEquations::FillMatrix(Xsp,
-		xres / 2, 0, 0, xres / 2,
-		0, -1 * yres / 2, 0, yres / 2,
-		0, 0, MAXINT, 0,
-		0, 0, 0, 1
-	);
 
 	//Initialize camera
 	GzDefaultCamera();
@@ -277,36 +270,26 @@ void ComputeXiw(GzMatrix target, GzCamera &cam) {
 
 }
 
+//Compute Xiw inverse here
+void ComputeXwi(GzMatrix target) {
+
+}
+
+//Initialize renderer
 int GzRender::GzBeginRender()
 {
-	/* HW 3.7
-	- setup for start of each frame - init frame buffer color,alpha,z
-	- compute Xiw and projection xform Xpi from camera definition
-	- init Ximage - put Xsp at base of stack, push on Xpi and Xiw
-	- now stack contains Xsw and app can push model Xforms when needed
-	*/
-
-	//Xsp
-	GzPushMatrix(Xsp);
-
-	//Xpi
-	float oneOverD = tan(ConvertToRadians(m_camera.FOV / 2));
-	GzMatrix Xpi = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, oneOverD, 0,
-		0, 0, oneOverD, 1
+	//Used for renderer intialization. No longer need transformations past world space.
+	//Use this for other initialization.
+	GzMatrix Xwi =
+	{
+		0,0,0,0,
+		0,0,0,0,
+		0,0,0,0,
+		0,0,0,0
 	};
-	memcpy(m_camera.Xpi, Xpi, sizeof(GzMatrix));
-	GzPushMatrix(m_camera.Xpi);
 
-
-	//Xiw
-	GzMatrix Xiw;
-	ComputeXiw(Xiw, m_camera);
-	memcpy(m_camera.Xiw, Xiw, sizeof(GzMatrix));
-	GzPushMatrix(m_camera.Xiw);
-
+	ComputeXwi(Xwi);
+	//Need to store and convert lights, camera, etc
 
 	return GZ_SUCCESS;
 }
@@ -1188,9 +1171,25 @@ void GzRender::GzPhongShading(int* pixels, int &size, GzCoord* vertPtr, GzCoord*
 
 
 
+//RAYTRACING CONTENT STARTING HERE. Comments in rend.h
 
+int GzRender::ConvertTri(float val1, float val2, float val3, float val4, float val5, float val6) {
+	return GZ_SUCCESS;
+}
 
+int RayCast() {
+	
+	return GZ_SUCCESS;
+}
 
+int GzRender::RenderImg() {
+
+	//for every px
+		//intersection = Raycast();
+		//Calculate color at loc
+		//Write to pixelbuffer
+	return GZ_SUCCESS;
+}
 
 
 

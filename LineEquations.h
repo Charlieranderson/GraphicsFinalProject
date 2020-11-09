@@ -22,5 +22,9 @@ public:
 	//Takes in a float[4], finds z value based on plane coefficients.
 	static float InterpolateZ(float* coefficients, int x, int y);
 
+
+private:
+	LineEquations(); //Don't Construct
+
 };
 

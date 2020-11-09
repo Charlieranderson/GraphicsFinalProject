@@ -113,3 +113,12 @@ typedef	struct {
 
 #define	MAXXRES	1024	/* put some bounds on size in case of error */
 #define	MAXYRES	1024
+
+#ifndef GZ_TRIDATA
+typedef struct {
+	GzCoord		verts;
+	GzCoord		norms;
+
+} Gz_Tridata;
+#define GZ_TRIDATA
+#endif

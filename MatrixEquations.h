@@ -29,5 +29,8 @@ public:
 	static void CrossProduct(float* vecOne, float* vecTwo, float* returnVal);
 
 	static void NormalizeMatrix(GzMatrix);
+
+private:
+	MatrixEquations(); //Dont' construct
 };
 

@@ -25,12 +25,12 @@ public:
 	unsigned short	yres;
 	GzPixel		*pixelbuffer;		/* frame buffer array */
 	char* framebuffer;
+	Gz_Tridata* tribuffer;
 
 	GzCamera		m_camera;
 	short		    matlevel;	        /* top of stack - current xform */
 	GzMatrix		Ximage[MATLEVELS];	/* stack of xforms (Xsm) */
 	GzMatrix		Xnorm[MATLEVELS];	/* xforms for norms (Xim) */
-	GzMatrix		Xsp;		        /* NDC to screen (pers-to-screen) */
 	GzColor		flatcolor;          /* color state for flat shaded triangles */
 	int			interp_mode;
 	int			numlights;
@@ -87,6 +87,11 @@ public:
 	int GzRotZMat(float degree, GzMatrix mat);
 	int GzTrxMat(GzCoord translate, GzMatrix mat);
 	int GzScaleMat(GzCoord scale, GzMatrix mat);
+
+	//Raytracing
+	int ConvertTri(float, float, float, float, float, float); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
+	int RenderImg(); /*Render the image*/
+	int Raycast(); /*Raycasts. Change return to the correct intersection*/
 
 };
 #endif
