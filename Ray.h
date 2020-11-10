@@ -9,6 +9,16 @@ typedef struct
 	float z;
 } Point;
 
+typedef	struct {
+	Point direction;
+	Point point;
+} GzLine;
+
+typedef	struct {
+	Point normal;
+	float d;
+} GzPlane;
+
 void normalize(Point input) 
 {
 	float modR = sqrt((input.x * input.x) + (input.y* input.y) + (input.z * input.z));

@@ -4,6 +4,7 @@
 #include	"stdio.h"
 #include	"math.h"
 #include	"Gz.h"
+#include	"Ray.h"
 #include	"rend.h"
 #include "LineEquations.h"
 #include "MatrixEquations.h"
@@ -1191,5 +1192,60 @@ int GzRender::RenderImg() {
 	return GZ_SUCCESS;
 }
 
+float dotProduct(Point a, Point b)
+{
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
 
+int FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersectingPoint)
+{
+	float a1 = vert1[X] - vert0[X]; //x2 - x1
+	float b1 = vert1[Y] - vert0[Y]; //y2 - y1
+	float c1 = vert1[Z] - vert0[Z]; //z2 - z1
+	float a2 = vert2[X] - vert0[X]; //x3 - x1
+	float b2 = vert2[Y] - vert0[Y]; //y3 - y1
+	float c2 = vert2[Z] - vert0[Z]; //z3 - z1
+	float planeConstantA = (b1 * c2) - (b2 * c1);
+	float planeConstantB = (a2 * c1) - (a1 * c2);
+	float planeConstantC = (a1 * b2) - (b1 * a2);
+	float planeConstantD = (-planeConstantA * (vert0[X]) - planeConstantB * (vert0[Y]) - planeConstantC * (vert0[Z])); // -aX1 - bY1 - cZ1
 
+	Point planeNormal;
+	planeNormal.x = planeConstantA;
+	planeNormal.y = planeConstantB;
+	planeNormal.z = planeConstantC;
+
+	GzLine line;
+	line.direction = ray.getDirection();
+	line.point = ray.getOrigin();
+
+	GzPlane plane;
+	plane.normal = planeNormal;
+	plane.d = planeConstantD;
+
+	// from line = p + t * v
+	Point p = line.point;            // (x1, y1, z1)
+	Point v = line.direction;        // (Vx, Vy, Vz)
+
+	// from plane: ax + by + cz + d = 0
+	Point n = plane.normal;          // (a, b, c)
+	float d = plane.d;               // constant term of plane
+
+	// dot products
+	float dot1 = dotProduct(n, v);             // a*Vx + b*Vy + c*Vz
+	float dot2 = dotProduct(n, p);             // a*x1 + b*y1 + c*z1
+
+	// if denominator=0, no intersect
+	if (dot1 == 0)
+		return GZ_FAILURE;
+
+	// find t = -(a*x1 + b*y1 + c*z1 + d) / (a*Vx + b*Vy + c*Vz)
+	float t = -(dot2 + d) / dot1;
+
+	// find intersection point
+	intersectingPoint[X] = p.x + (t * v.x);
+	intersectingPoint[Y] = p.y + (t * v.y);
+	intersectingPoint[Z] = p.z + (t * v.z);
+
+	return GZ_SUCCESS;
+}
