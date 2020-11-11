@@ -248,10 +248,12 @@ bool GzRender::CheckBounds(const int &i, const int &j) const {
 	return true;
 }
 
-void ComputeXiw(GzMatrix target, GzCamera &cam) {
+//Compute Xiw inverse here
+void ComputeXwi(GzMatrix target, GzCamera &cam) {
+	
 	float zVec[] = { cam.lookat[X] - cam.position[X],
-			cam.lookat[Y] - cam.position[Y],
-			cam.lookat[Z] - cam.position[Z] };
+		cam.lookat[Y] - cam.position[Y],
+		cam.lookat[Z] - cam.position[Z] };
 	MatrixEquations::NormalizeVectorThree(zVec);
 
 	float uPZDot = MatrixEquations::DotProduct(cam.worldup, zVec, 3);
@@ -264,32 +266,18 @@ void ComputeXiw(GzMatrix target, GzCamera &cam) {
 	MatrixEquations::CrossProduct(yVec, zVec, xVec);
 
 	MatrixEquations::FillMatrix(target,
-		xVec[X], xVec[Y], xVec[Z], -1 * MatrixEquations::DotProduct(xVec, cam.position, 3),
-		yVec[X], yVec[Y], yVec[Z], -1 * MatrixEquations::DotProduct(yVec, cam.position, 3),
-		zVec[X], zVec[Y], zVec[Z], -1 * MatrixEquations::DotProduct(zVec, cam.position, 3),
+		xVec[X], yVec[X], zVec[X], cam.position[X],
+		xVec[Y], yVec[Y], zVec[Y], cam.position[Y],
+		xVec[Z], yVec[Z], zVec[Z], cam.position[Z],
 		0, 0, 0, 1);
-
-}
-
-//Compute Xiw inverse here
-void ComputeXwi(GzMatrix target) {
-
 }
 
 //Initialize renderer
 int GzRender::GzBeginRender()
 {
-	//Used for renderer intialization. No longer need transformations past world space.
-	//Use this for other initialization.
-	GzMatrix Xwi =
-	{
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0
-	};
-
-	ComputeXwi(Xwi);
+	
+	//Computes Xwi, stored in GzRender class
+	ComputeXwi(Xwi, m_camera);
 	//Need to store and convert lights, camera, etc
 
 	return GZ_SUCCESS;
@@ -300,6 +288,13 @@ int GzRender::GzPutCamera(GzCamera camera)
 	/* HW 3.8
 	/*- overwrite renderer camera structure with new camera definition
 	*/
+
+	//Move the camera to worldspace.
+	MatrixEquations::MatrixVectorMult(Xwi, camera.lookat);
+	MatrixEquations::MatrixVectorMult(Xwi, camera.position);
+	MatrixEquations::MatrixVectorMult(Xwi, camera.worldup);
+
+
 	m_camera.FOV = camera.FOV;
 	memcpy(m_camera.lookat, camera.lookat, sizeof(GzCoord));
 	memcpy(m_camera.worldup, camera.worldup, sizeof(GzCoord));
@@ -465,6 +460,10 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 		case GZ_DIRECTIONAL_LIGHT:
 		{
 			GzLight* lightPtr = (GzLight*)valueList[i];
+
+			//Convert lights from image space to worldspace
+			MatrixEquations::MatrixVectorMult(Xwi, lights[numlights].direction);
+
 			lights[numlights].direction[0] = lightPtr->direction[0];
 			lights[numlights].direction[1] = lightPtr->direction[1];
 			lights[numlights].direction[2] = lightPtr->direction[2];
@@ -526,75 +525,7 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
-
-/*Creates an array of pixels to be tested. Sets size of array*/
-int* GzRender::GetTestablePixels(GzCoord* ptr, int &size) {
-
-	float lowestX, highestX, lowestY, highestY;
-	float *vertOne = (float*)ptr[0];
-
-	float *vertTwo = (float*)ptr[1];
-
-	float *vertThree = (float*)ptr[2];
-
-	float xVals[3] = { vertOne[0], vertTwo[0], vertThree[0] };
-	float yVals[3] = { vertOne[1], vertTwo[1], vertThree[1] };
-
-
-
-	auto eval = [](float vals[3], float &returnVal, bool highest) {
-		returnVal = vals[0];
-		if (highest) {
-			if (returnVal < vals[1]) {
-				returnVal = vals[1];
-			}
-
-			if (returnVal < vals[2]) {
-				returnVal = vals[2];
-			}
-		}
-		else {
-			if (returnVal > vals[1]) {
-				returnVal = vals[1];
-			}
-
-			if (returnVal > vals[2]) {
-				returnVal = vals[2];
-			}
-		}
-
-	};
-
-	eval(xVals, lowestX, false);
-	eval(yVals, lowestY, false);
-	eval(xVals, highestX, true);
-	eval(yVals, highestY, true);
-
-	//Ceiling only because of less than eval in for loop
-	int lowestIntX = ceil(lowestX);
-	int lowestIntY = ceil(lowestY);
-	int highestIntX = ceil(highestX);
-	int highestIntY = ceil(highestY);
-
-	//Set size for return
-	size = (highestIntY - lowestIntY)*(highestIntX - lowestIntX);
-
-	int* pixelsToBeTested = new int[size];
-	int index = 0;
-	for (int i = lowestIntX; i < highestIntX; i++) {
-		for (int j = lowestIntY; j < highestIntY; j++) {
-			pixelsToBeTested[index] = ARRAY(i, j);
-			index++;
-		}
-	}
-
-
-	return pixelsToBeTested;
-
-}
-
-/*Evaluate pixels to see if they are in tri. If they are, write value over unused
-pixel indexes, set new size.
+/*EXAMPLE ON HOW TO USE LEE IN THIS CODE
 */
 void GzRender::FindPixelsInTri(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList, int* pixels, int &size) {
 
@@ -632,90 +563,6 @@ void GzRender::FindPixelsInTri(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex*
 	}
 
 	size = curIndex; //Set new size
-}
-
-int GzRender::GzPutTriangle(int	numParts, GzToken *nameList, GzPointer *valueList)
-/* numParts - how many names and values */
-{
-	/* HW 2.2
-	-- Pass in a triangle description with tokens and values corresponding to
-		  GZ_NULL_TOKEN:		do nothing - no values
-		  GZ_POSITION:		3 vert positions in model space
-	-- Invoke the rastrizer/scanline framework
-	-- Return error code
-	*/
-	/* use position stuff to edit pixelbuffer directly to draw it*/
-
-	GzCoord* normalPtr;
-	GzCoord* valuePtr;
-	GzTextureIndex* uvList;
-	//Convert normals to image space
-	for (int j = 0; j < numParts; j++) {
-		if (nameList[j] == GZ_NORMAL) {
-			normalPtr = (GzCoord*)valueList[j];
-			MatrixEquations::MatrixVectorMult(Xnorm[matlevel - 1], (float*)normalPtr);
-			MatrixEquations::MatrixVectorMult(Xnorm[matlevel - 1], (float*)normalPtr[1]);
-			MatrixEquations::MatrixVectorMult(Xnorm[matlevel - 1], (float*)normalPtr[2]);
-
-			//Can normalize matrices when pushed instead for large computational gain
-			MatrixEquations::NormalizeVectorThree((float*)normalPtr[0]);
-			MatrixEquations::NormalizeVectorThree((float*)normalPtr[1]);
-			MatrixEquations::NormalizeVectorThree((float*)normalPtr[2]);
-
-		}
-	}
-
-	for (int j = 0; j < numParts; j++) {
-		if (nameList[j] == GZ_TEXTURE_INDEX) {
-			uvList = (GzTextureIndex*)valueList[j]; //Size 3 uvList
-		}
-	}
-
-	//Find pixels, write color and write to FB
-	for (int j = 0; j < numParts; j++) {
-		//evaluate Tokens
-		if (nameList[0] == GZ_POSITION) {
-
-			valuePtr = (GzCoord*)valueList[0];
-
-			//Convert model coords to screen coords
-			bool onScreen = MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], (float*)valuePtr) &&
-				MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], (float*)valuePtr[1]) &&
-				MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], (float*)valuePtr[2]);
-
-			//Check if Z val is behind screen
-			if (!onScreen) {
-				return GZ_SUCCESS;
-			}
-
-			//Get pixels to test
-			int size;
-			int* pixels = GetTestablePixels(valuePtr, size);
-
-			//Test and get the pixels in the tri
-			FindPixelsInTri(valuePtr, normalPtr, uvList, pixels, size);
-
-			//Get A,B,C coefficients for a plane for Z interp
-			float planeCoefficients[4];
-			LineEquations::GetPlaneCoefficients((float*)(valuePtr[0]), (float*)(valuePtr[1]), (float*)(valuePtr[2]), planeCoefficients);
-
-			if (interp_mode == GZ_FLAT) {
-				GzFlatShading(pixels, size, planeCoefficients);
-			}
-			else if (interp_mode == GZ_COLOR) {
-				GzGouraudShading(pixels, size, valuePtr, normalPtr, planeCoefficients, uvList);
-			}
-			else if (interp_mode == GZ_NORMALS) {
-				GzPhongShading(pixels, size, valuePtr, normalPtr, planeCoefficients, uvList);
-			}
-
-			delete[] pixels;
-
-		}
-	}
-
-
-	return GZ_SUCCESS;
 }
 
 void GzRender::CalculateColor(float normal[3], float returnColor[3]) {
@@ -1178,9 +1025,19 @@ int GzRender::ConvertTri(float val1, float val2, float val3, float val4, float v
 	return GZ_SUCCESS;
 }
 
-int RayCast() {
+int GzRender::Raycast() {
 	
 	return GZ_SUCCESS;
+}
+
+
+void GzRender::ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel) {
+
+	float imageAspectRatio = xres / yres;
+
+	worldSpacePixel[0] = (2 * ((x + 0.5) / xres) - 1) * tan(DEFAULT_FOV / 2 * PI / 180) * imageAspectRatio;
+	worldSpacePixel[1] = (1 - 2 * ((y + 0.5) / yres)) * tan(DEFAULT_FOV / 2 * PI / 180);
+	worldSpacePixel[2] = -1;
 }
 
 int GzRender::RenderImg() {
@@ -1189,6 +1046,20 @@ int GzRender::RenderImg() {
 		//intersection = Raycast();
 		//Calculate color at loc
 		//Write to pixelbuffer
+	for (int i = 0; i < xres * yres; i++) {
+		x = i % yres;
+		y = i / xres;
+		GzCoord worldSpacePixel;
+		ConvertPixelToWorldSpace(x, y, worldSpacePixel);
+
+		//Create ray with m_camera position, worldspacePixel position
+		//Check intersections
+
+
+
+	}
+
+
 	return GZ_SUCCESS;
 }
 

@@ -1,31 +1,37 @@
 ﻿cl : Command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
   rend.cpp
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(14): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(31): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\ray.h(24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(15): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
 c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(36): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(37): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(55): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(65): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(67): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(85): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(66): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(68): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(86): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(90): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(91): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(573): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(574): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(575): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(576): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(763): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(826): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(865): warning C4838: conversion from 'float' to 'GzIntensity' requires a narrowing conversion
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(865): warning C4244: 'initializing': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1004): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1005): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1006): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1079): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1162): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1163): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1164): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
-  CS580HW5.vcxproj -> C:\Users\Charlie\Projects\USC Work\3D Graphics\Graphics Final Project\GraphicsFinalProject\.\Debug\CS580HW5.exe
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(92): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(596): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(597): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(598): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(599): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(786): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(849): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(888): warning C4838: conversion from 'float' to 'GzIntensity' requires a narrowing conversion
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(888): warning C4244: 'initializing': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1027): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1028): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1029): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1102): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1185): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1186): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1187): warning C4244: '=': conversion from 'float' to 'GzIntensity', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1211): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1213): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\charlie\projects\usc work\3d graphics\graphics final project\graphicsfinalproject\rend.cpp(1214): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+rend.obj : error LNK2005: "void __cdecl normalize(struct Point)" (?normalize@@YAXUPoint@@@Z) already defined in Camera.obj
+rend.obj : error LNK2005: "struct Point __cdecl dotProduct(struct Point,float)" (?dotProduct@@YA?AUPoint@@U1@M@Z) already defined in Camera.obj
+.\Debug\CS580HW5.exe : fatal error LNK1169: one or more multiply defined symbols found

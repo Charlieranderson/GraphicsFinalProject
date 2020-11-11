@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Application5.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CS580HW.cpp" />
     <ClCompile Include="CS580HWDoc.cpp" />
     <ClCompile Include="CS580HWView.cpp" />
@@ -157,6 +158,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Application5.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CS580HW.h" />
     <ClInclude Include="CS580HWDoc.h" />
     <ClInclude Include="CS580HWView.h" />
@@ -164,6 +166,7 @@
     <ClInclude Include="LineEquations.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MatrixEquations.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="rend.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RotateDlg.h" />

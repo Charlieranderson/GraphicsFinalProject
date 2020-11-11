@@ -259,8 +259,15 @@ int Application5::Render()
 	     valueListTriangle[0] = (GzPointer)vertexList; 
 		 valueListTriangle[1] = (GzPointer)normalList; 
 		 valueListTriangle[2] = (GzPointer)uvList; 
-		 m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle); 
+
+		 
+		 //m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle); 
+
+		 //Convert triangles to worldspace
+		 //Store in renderer tribuffer
 	} 
+
+	//Render img call here
 
 	m_pRender->GzFlushDisplay2File(outfile); 	/* write out or update display to file*/
 	m_pRender->GzFlushDisplay2FrameBuffer();	// write out or update display to frame buffer

@@ -26,6 +26,7 @@ public:
 	GzPixel		*pixelbuffer;		/* frame buffer array */
 	char* framebuffer;
 	Gz_Tridata* tribuffer;
+	GzMatrix		Xwi;
 
 	GzCamera		m_camera;
 	short		    matlevel;	        /* top of stack - current xform */
@@ -92,6 +93,6 @@ public:
 	int ConvertTri(float, float, float, float, float, float); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 	int RenderImg(); /*Render the image*/
 	int Raycast(); /*Raycasts. Change return to the correct intersection*/
-
+	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
 };
 #endif
