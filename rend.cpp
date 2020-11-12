@@ -1111,24 +1111,17 @@ int GzRender::ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord
 	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal3);
 
 
-	//NEED TO STORE DATA
-	//Gz_Tridata data;
-	//memcpy(data.vertOne, point1, sizeof(GzCoord));
-	//memcpy(data.vertTwo, point2, sizeof(GzCoord));
-	//memcpy(data.vertThree, point3, sizeof(GzCoord));
-	//memcpy(data.normOne, normal1, sizeof(GzCoord));
-	//memcpy(data.normTwo, normal2, sizeof(GzCoord));
-	//memcpy(data.normThree, normal3, sizeof(GzCoord));
-	////data.vertOne = point1;
-	////data.vertTwo = point2;
-	////data.vertThree = point3;
-	////data.normOne = normal1;
-	////data.normTwo = normal2;
-	////data.normThree = normal3;
-	//Gz_Tridata* dataPtr = &data;
+	//put data into gztridata
+	GzTridata data;
+	memcpy(data.vertOne, point1, sizeof(GzCoord));
+	memcpy(data.vertTwo, point2, sizeof(GzCoord));
+	memcpy(data.vertThree, point3, sizeof(GzCoord));
+	memcpy(data.normOne, normal1, sizeof(GzCoord));
+	memcpy(data.normTwo, normal2, sizeof(GzCoord));
+	memcpy(data.normThree, normal3, sizeof(GzCoord));
 
-	//memcpy(tribuffer[tribufferIndex], dataPtr, sizeof(Gz_Tridata));
-	//tribufferIndex++;
+	//store in tribuffer
+	tribuffer.push_back(data); //
 
 	return GZ_SUCCESS;
 }

@@ -3,6 +3,7 @@
 #define GZRENDER_
 #include	"gz.h"
 #include	"Ray.h"
+#include	<vector>
 
 /* Camera defaults */
 #define	DEFAULT_FOV		35.0
@@ -28,8 +29,7 @@ public:
 	unsigned short	yres;
 	GzPixel		*pixelbuffer;		/* frame buffer array */
 	char* framebuffer;
-	Gz_Tridata* tribuffer;
-	int tribufferIndex = 0;
+	std::vector<GzTridata> tribuffer;
 	GzMatrix		Xwi;
 
 	GzCamera		m_camera;

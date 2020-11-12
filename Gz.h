@@ -123,6 +123,6 @@ typedef struct {
 	GzCoord		normTwo;
 	GzCoord		normThree;
 
-} Gz_Tridata;
+} GzTridata;
 #define GZ_TRIDATA
 #endif
