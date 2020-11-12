@@ -3,8 +3,6 @@
 #include	"stdafx.h"
 #include	"stdio.h"
 #include	"math.h"
-#include	"Gz.h"
-#include	"Ray.h"
 #include	"rend.h"
 #include "LineEquations.h"
 #include "MatrixEquations.h"

@@ -1,4 +1,5 @@
 #include	"gz.h"
+#include "ray.h"
 #ifndef GZRENDER_
 #define GZRENDER_
 
@@ -17,6 +18,8 @@
 #define	MATLEVELS	100		/* how many matrix pushes allowed */
 #define	MAX_LIGHTS	10		/* how many lights allowed */
 
+void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection);
+void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction);
 class GzRender{			/* define a renderer */
   
 
@@ -74,7 +77,7 @@ public:
 	void CalculateColor(float[3], float returnColor[3]);
 	void CalculatePhongColor(float normal[3], float returnColor[3], float newKd[3], float newKa[3]);
 	void CalculateGouraudColor(float normal[3], float returnColor[3]);
-	void CalculateColorRaytrace(Ray ray, float hitpoint[3], float returnColor[3]);
+	void CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]);
 
 	// Extra methods: NOT part of API - just for general assistance */
 	inline int ARRAY(int x, int y){return (x+y*xres);}	/* simplify fbuf indexing */
