@@ -74,6 +74,7 @@ public:
 	void CalculateColor(float[3], float returnColor[3]);
 	void CalculatePhongColor(float normal[3], float returnColor[3], float newKd[3], float newKa[3]);
 	void CalculateGouraudColor(float normal[3], float returnColor[3]);
+	void CalculateColorRaytrace(Ray ray, float hitpoint[3], float returnColor[3]);
 
 	// Extra methods: NOT part of API - just for general assistance */
 	inline int ARRAY(int x, int y){return (x+y*xres);}	/* simplify fbuf indexing */

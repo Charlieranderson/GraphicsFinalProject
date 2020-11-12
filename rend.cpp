@@ -691,6 +691,94 @@ void GzRender::CalculateGouraudColor(float normal[3], float returnColor[3]) {
 
 }
 
+void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
+	//Recursively search for rays and reflection/refraction ray
+	Ray reflec, refrac;
+	GzColor spec, diff;
+	GzColor Kr, Kt;
+	GzColor intensity;
+	//Something = FindIntersecion
+	GzCoord intersection = { 0,0,0 };
+	int Something; //Return of Findintersection
+	//normal of hit thing
+	GzCoord normal = { 0,0,0 };
+	if (Something != -1) {
+		// Do PhongIllumination(ray,normal,intensity) to get intensity
+		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
+		{
+			GetReflection(&ray, normal, intersection, &reflec);
+
+			if (depth <= 5) {
+				CalculateColorRaytrace(reflec, depth + 1, spec);
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= Kr[i] / depth;
+				}
+			}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= 0;
+				}
+			}
+		}
+
+		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
+		{
+			GetRefraction(&ray, normal, intersection, &refrac);
+
+			if (depth <= 5) {
+				CalculateColorRaytrace(refrac, depth + 1, diff);
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= Kt[i] / depth;
+				}
+			}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= 0;
+				}
+			}
+		}
+		for (int i = 0; i < 3; ++i) {
+			intensity[i] = spec[i] + diff[i] + intensity[i];
+		}
+	}
+	else {
+		for (int i = 0; i < 3; ++i) {
+			intensity[i] = 0;
+		}
+	}
+
+
+}
+
+void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
+{
+	Point new_origin;
+	Point new_dir;
+	float RdotN;
+	//need to fix this float RdotN = dotProduct(normal, ray->getDirection());
+	if (RdotN > 0) {
+		for (int i = 0; i < 3; ++i)
+			normal[i] *= -1;
+		//need to fix this float RdotN = dotProduct(normal, ray->getDirection());
+
+	}
+	new_dir.x = ray->getDirection().x - (2 * abs(RdotN)* normal[X]);
+	new_dir.y = ray->getDirection().y - (2 * abs(RdotN)* normal[Y]);
+	new_dir.z = ray->getDirection().z - (2 * abs(RdotN)* normal[Z]);
+	normalize(new_dir);
+	new_origin.x = hitPoint[X] + 1 * new_dir.x;
+	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
+	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
+	reflection = &Ray(new_origin, new_dir);
+	return;
+}
+
+void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
+{
+	refraction = &Ray(ray->PointAt(1), ray->getDirection());
+	return;
+}
+
 void ColorOverflowCorrection(float colorValue[3]) {
 	//Color overflow correction
 	if (colorValue[RED] > 1)
@@ -1047,8 +1135,8 @@ int GzRender::RenderImg() {
 		//Calculate color at loc
 		//Write to pixelbuffer
 	for (int i = 0; i < xres * yres; i++) {
-		x = i % yres;
-		y = i / xres;
+		int x = i % yres;
+		int y = i / xres;
 		GzCoord worldSpacePixel;
 		ConvertPixelToWorldSpace(x, y, worldSpacePixel);
 
