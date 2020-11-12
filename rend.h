@@ -99,5 +99,8 @@ public:
 	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
 	int ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord normal1, GzCoord normal2, GzCoord normal3); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 
+	// help function for Camera
+	Ray getRay(float s, float t, GzCamera cam);
+	int CameraUpdate(GzCamera cam);
 };
 #endif

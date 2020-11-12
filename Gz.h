@@ -64,7 +64,14 @@ typedef struct  GzCamera
   GzCoord			position;  /* position of image plane origin */
   GzCoord			lookat;         /* position of look-at-point */
   GzCoord			worldup;   /* world up-vector (almost screen up) */
+
+  GzCoord           lowerLeftCorner; /*position of the lower left corner of the near plane of the viewing cone*/
+  GzCoord           horizontal; // horizontal span of the near plane in the camera coordinate system
+  GzCoord           vertical; // The vertical span of the near plane in the camera coordinate system
+  GzCoord           m_axisX, m_axisY, m_axisZ;
+  float             aspect;// Screen aspect ratio
   float				FOV;            /* horizontal field of view */
+
 } GzCamera;
 #endif
 

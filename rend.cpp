@@ -295,6 +295,7 @@ int GzRender::GzPutCamera(GzCamera camera)
 
 
 	m_camera.FOV = camera.FOV;
+	m_camera.aspect = yres / xres;
 	memcpy(m_camera.lookat, camera.lookat, sizeof(GzCoord));
 	memcpy(m_camera.worldup, camera.worldup, sizeof(GzCoord));
 	memcpy(m_camera.position, camera.position, sizeof(GzCoord));
@@ -1205,35 +1206,84 @@ int GzRender::RenderImg() {
 		//intersection = Raycast();
 		//Calculate color at loc
 		//Write to pixelbuffer
-	for (int i = 0; i < xres * yres; i++) {
-		int x = i % yres;
-		int y = i / xres;
-		GzCoord worldSpacePixel;
-		ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
-
-		//TODO: Create ray with m_camera position, worldspacePixel position
-		Ray ray;
-
-		GzCoord intersection, minIntersectPoint;
-		float smallestTValue = INT_MAX;
-		//need a loop to iterate through all world space triangles
-		//Check intersections
-		for (int k = 0; k < tribuffer.size(); k++)
+	for (int row = yres - 1; row >= 0; --row)
+	{
+		for (int col = 0; col < xres; ++col)
 		{
-			float t = FindIntersection(ray, tribuffer[k].vertOne, tribuffer[k].vertTwo, tribuffer[k].vertThree, intersection);
+			float x = col / xres;
+			float y = row / yres;
+			GzCoord worldSpacePixel;
+			ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
 
-			// Check for smallest t value
-			if (t <= smallestTValue)
+			//TODO: Create ray with m_camera position, worldspacePixel position
+			CameraUpdate(m_camera);
+			Ray ray = getRay(x, y, m_camera);
+
+			GzCoord intersection, minIntersectPoint;
+			float smallestTValue = INT_MAX;
+			//need a loop to iterate through all world space triangles
+			//Check intersections
+			for (int k = 0; k < tribuffer.size(); k++)
 			{
-				smallestTValue = t;
-				memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+				float t = FindIntersection(ray, tribuffer[k].vertOne, tribuffer[k].vertTwo, tribuffer[k].vertThree, intersection);
+
+				// Check for smallest t value
+				if (t <= smallestTValue)
+				{
+					smallestTValue = t;
+					memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+				}
 			}
+
+			// Use variable "minIntersectPoint" in computing color, reflections, etc
+			//Calculate color, reflections, occlusion for the nearest intersected triangle
+
 		}
-
-		// Use variable "minIntersectPoint" in computing color, reflections, etc
-		//Calculate color, reflections, occlusion for the nearest intersected triangle
-
 	}
 
 	return GZ_SUCCESS;
+}
+
+//camera
+int GzRender::CameraUpdate(GzCamera cam)
+{
+	
+	// frustum.
+	float theta = cam.FOV;
+	float half_height = tan(theta * 0.5f);
+	float half_width = cam.aspect * half_height;
+
+	// camera coordinate system.
+	for (int i = 0; i < 3; i++) 
+	{
+		cam.m_axisZ[i] = cam.position[i] - cam.lookat[i];
+	}
+	MatrixEquations::NormalizeVectorThree(cam.m_axisZ);
+	MatrixEquations::CrossProduct(cam.worldup, cam.m_axisZ, cam.m_axisX);
+	MatrixEquations::NormalizeVectorThree(cam.m_axisX);
+	MatrixEquations::CrossProduct(cam.m_axisZ, cam.m_axisX, cam.m_axisY);
+	MatrixEquations::NormalizeVectorThree(cam.m_axisY);
+
+	// view port.
+	for (int i = 0; i < 3; i++)
+	{
+	    cam.lowerLeftCorner[i] = cam.position[i] - cam.m_axisX[i] * half_width - cam.m_axisY[i] * half_height - cam.m_axisZ[i];
+		cam.horizontal[i] = cam.m_axisX[i] * 2.0f * half_width;
+		cam.vertical[i] = cam.m_axisY[i] * 2.0f * half_height;
+	}
+
+	return GZ_SUCCESS;
+}
+Ray GzRender::getRay(float s, float t, GzCamera cam)
+{
+	Point Pos, Dir;
+	Pos.x = cam.position[0];
+	Pos.y = cam.position[1];
+	Pos.z = cam.position[2];
+
+	Dir.x = cam.lowerLeftCorner[0] + cam.horizontal[0] * s + cam.vertical[0] * t - cam.position[0];
+	Dir.y = cam.lowerLeftCorner[1] + cam.horizontal[1] * s + cam.vertical[1] * t - cam.position[1];
+	Dir.z = cam.lowerLeftCorner[2] + cam.horizontal[2] * s + cam.vertical[2] * t - cam.position[2];
+
+	return Ray(Pos, Dir);
 }
