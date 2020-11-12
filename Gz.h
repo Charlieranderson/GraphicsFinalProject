@@ -116,8 +116,12 @@ typedef	struct {
 
 #ifndef GZ_TRIDATA
 typedef struct {
-	GzCoord		verts;
-	GzCoord		norms;
+	GzCoord		vertOne;
+	GzCoord		vertTwo;
+	GzCoord		vertThree;
+	GzCoord		normOne;
+	GzCoord		normTwo;
+	GzCoord		normThree;
 
 } Gz_Tridata;
 #define GZ_TRIDATA

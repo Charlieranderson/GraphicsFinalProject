@@ -198,10 +198,14 @@ GzMatrix	rotateY =
 #endif
         status |= m_pRender->GzPutAttribute(6, nameListShader, valueListShader);
 
+	//Vert stack
+	status |= m_pRender->GzPushMatrix(scale, m_pRender->Ximage, m_pRender->matlevel, false);  
+	status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Ximage, m_pRender->matlevel, false);
+	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Ximage, m_pRender->matlevel, false);
 
-	status |= m_pRender->GzPushMatrix(scale);  
-	status |= m_pRender->GzPushMatrix(rotateY); 
-	status |= m_pRender->GzPushMatrix(rotateX); 
+	//Normal Stack
+	status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Xnorm, m_pRender->normMatLevel, true);
+	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Ximage, m_pRender->normMatLevel, true);
 
 	if (status) exit(GZ_FAILURE); 
 
@@ -385,7 +389,8 @@ int Application5::Render()
 
 	     //Convert triangles to worldspace
 		 //Store in renderer tribuffer
-		 //m_pRender->ConvertTri(stuff)
+		 //Takes 3 sets of verts, 3 sets of normals, ignores UV for now. 
+		 //m_pRender->ConvertTri(Gzcoord, Gzcoord,Gzcoord,Gzcoord,Gzcoord,Gzcoord)
 
 	} 
 

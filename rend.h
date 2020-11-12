@@ -1,8 +1,8 @@
-#include	"gz.h"
-#include "ray.h"
+
 #ifndef GZRENDER_
 #define GZRENDER_
-
+#include	"gz.h"
+#include	"Ray.h"
 
 /* Camera defaults */
 #define	DEFAULT_FOV		35.0
@@ -29,10 +29,12 @@ public:
 	GzPixel		*pixelbuffer;		/* frame buffer array */
 	char* framebuffer;
 	Gz_Tridata* tribuffer;
+	int tribufferIndex = 0;
 	GzMatrix		Xwi;
 
 	GzCamera		m_camera;
 	short		    matlevel;	        /* top of stack - current xform */
+	short			normMatLevel;
 	GzMatrix		Ximage[MATLEVELS];	/* stack of xforms (Xsm) */
 	GzMatrix		Xnorm[MATLEVELS];	/* xforms for norms (Xim) */
 	GzColor		flatcolor;          /* color state for flat shaded triangles */
@@ -64,8 +66,8 @@ public:
 
 	// HW3
 	int GzPutCamera(GzCamera camera);
-	int GzPushMatrix(GzMatrix	matrix);
-	int GzPopMatrix();
+	int GzPushMatrix(GzMatrix	matrix, GzMatrix* target, int counter, bool normalizeMatrix);
+	int GzPopMatrix(int counter);
 	int GzDefaultCamera();
 
 	//HW4 - Created methods
@@ -92,9 +94,10 @@ public:
 	int GzScaleMat(GzCoord scale, GzMatrix mat);
 
 	//Raytracing
-	int ConvertTri(GzCoord, GzCoord, GzCoord, GzCoord, GzCoord, GzCoord); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 	int RenderImg(); /*Render the image*/
 	int Raycast(); /*Raycasts. Change return to the correct intersection*/
 	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
+	int ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord normal1, GzCoord normal2, GzCoord normal3); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
+
 };
 #endif

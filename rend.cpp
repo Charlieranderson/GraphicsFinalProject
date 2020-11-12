@@ -201,6 +201,7 @@ GzRender::GzRender(int xRes, int yRes) : xres(xRes), yres(yRes)
 */
 //Initialize variables
 	matlevel = 0;
+	normMatLevel = 0;
 	numlights = 0;
 
 	//Initialize camera
@@ -301,59 +302,49 @@ int GzRender::GzPutCamera(GzCamera camera)
 	return GZ_SUCCESS;
 }
 
-int GzRender::GzPushMatrix(GzMatrix	matrix)
+int GzRender::GzPushMatrix(GzMatrix	matrix, GzMatrix* target, int counter, bool normalizeMatrix)
 {
 	/* HW 3.9
 	- push a matrix onto the Ximage stack
 	- check for stack overflow
 	*/
-
-	if (matlevel > 20) {
+	if (counter > 20) {
 		//Capped at 20
 		return GZ_FAILURE;
 	}
 
-	if (matlevel == 0) {
-		memcpy(Ximage[0], matrix, sizeof(GzMatrix));
-	}
-	else {
-		MatrixEquations::MultMatrices(Ximage[matlevel - 1], matrix, Ximage[matlevel]);
-	}
-
-	/* HW 4 */
-	if (matlevel < 2) {
-		GzMatrix identity = {
-			1,0,0,0,
-			0,1,0,0,
-			0,0,1,0,
-			0,0,0,1
-		};
-		memcpy(Xnorm[matlevel], identity, sizeof(GzMatrix));
-	}
-	else {
+	if (normalizeMatrix) {
 		MatrixEquations::NormalizeMatrix(matrix);
 		matrix[0][3] = 0;
 		matrix[1][3] = 0;
 		matrix[2][3] = 0;
-		MatrixEquations::MultMatrices(Xnorm[matlevel - 1], matrix, Xnorm[matlevel]);
 	}
-	matlevel++;
+
+
+	if (counter == 0) {
+		memcpy(target[0], matrix, sizeof(GzMatrix));
+	}
+	else {
+		MatrixEquations::MultMatrices(target[counter - 1], matrix, target[counter]);
+	}
+
+	counter++;
 
 	return GZ_SUCCESS;
 }
 
-int GzRender::GzPopMatrix()
+int GzRender::GzPopMatrix(int counter)
 {
 	/* HW 3.10
 	- pop a matrix off the Ximage stack
 	- check for stack underflow
 	*/
 
-	if (matlevel == 0) {
+	if (counter == 0) {
 		//Tried to pop too far.
 		return GZ_FAILURE;
 	}
-	matlevel--;
+	counter--;
 
 	return GZ_SUCCESS;
 }
@@ -763,7 +754,7 @@ void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
 	new_dir.x = ray->getDirection().x - (2 * abs(RdotN)* normal[X]);
 	new_dir.y = ray->getDirection().y - (2 * abs(RdotN)* normal[Y]);
 	new_dir.z = ray->getDirection().z - (2 * abs(RdotN)* normal[Z]);
-	normalize(new_dir);
+	ray->Normalize(new_dir);
 	new_origin.x = hitPoint[X] + 1 * new_dir.x;
 	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
 	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
@@ -1107,9 +1098,37 @@ void GzRender::GzPhongShading(int* pixels, int &size, GzCoord* vertPtr, GzCoord*
 
 //RAYTRACING CONTENT STARTING HERE. Comments in rend.h
 
-int GzRender::ConvertTri(GzCoord vertOne, GzCoord vertTwo, GzCoord vertThree, GzCoord normalOne, GzCoord normalTwo, GzCoord normalThree) {
-	//Convert triangle verts and normals to world space via Xwm 
-	//Store triangles in renderer array
+int GzRender::ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord normal1, GzCoord normal2, GzCoord normal3)
+{
+	//vertice transfrom;
+
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], point1);
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], point2);
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], point3);
+
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal1);
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal2);
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal3);
+
+
+	//NEED TO STORE DATA
+	//Gz_Tridata data;
+	//memcpy(data.vertOne, point1, sizeof(GzCoord));
+	//memcpy(data.vertTwo, point2, sizeof(GzCoord));
+	//memcpy(data.vertThree, point3, sizeof(GzCoord));
+	//memcpy(data.normOne, normal1, sizeof(GzCoord));
+	//memcpy(data.normTwo, normal2, sizeof(GzCoord));
+	//memcpy(data.normThree, normal3, sizeof(GzCoord));
+	////data.vertOne = point1;
+	////data.vertTwo = point2;
+	////data.vertThree = point3;
+	////data.normOne = normal1;
+	////data.normTwo = normal2;
+	////data.normThree = normal3;
+	//Gz_Tridata* dataPtr = &data;
+
+	//memcpy(tribuffer[tribufferIndex], dataPtr, sizeof(Gz_Tridata));
+	//tribufferIndex++;
 
 	return GZ_SUCCESS;
 }
