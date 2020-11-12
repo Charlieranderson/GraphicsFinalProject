@@ -1021,7 +1021,10 @@ void GzRender::GzPhongShading(int* pixels, int &size, GzCoord* vertPtr, GzCoord*
 
 //RAYTRACING CONTENT STARTING HERE. Comments in rend.h
 
-int GzRender::ConvertTri(float val1, float val2, float val3, float val4, float val5, float val6) {
+int GzRender::ConvertTri(GzCoord vertOne, GzCoord vertTwo, GzCoord vertThree, GzCoord normalOne, GzCoord normalTwo, GzCoord normalThree) {
+	//Convert triangle verts and normals to world space via Xwm 
+	//Store triangles in renderer array
+
 	return GZ_SUCCESS;
 }
 
@@ -1047,15 +1050,17 @@ int GzRender::RenderImg() {
 		//Calculate color at loc
 		//Write to pixelbuffer
 	for (int i = 0; i < xres * yres; i++) {
-		x = i % yres;
-		y = i / xres;
+		int x = i % yres;
+		int y = i / xres;
 		GzCoord worldSpacePixel;
-		ConvertPixelToWorldSpace(x, y, worldSpacePixel);
+		ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
+
+		//need a loop to iterate through all world space triangles
 
 		//Create ray with m_camera position, worldspacePixel position
 		//Check intersections
 
-
+		//Calculate color, reflections, occlusion for the nearest intersected triangle
 
 	}
 

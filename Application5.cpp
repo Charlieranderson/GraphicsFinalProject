@@ -381,10 +381,12 @@ int Application5::Render()
 		 valueListTriangle[2] = (GzPointer)uvList; 
 
 		 
-		 //m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle); 
+		 //m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle);  Old stuff
 
-		 //Convert triangles to worldspace
+	     //Convert triangles to worldspace
 		 //Store in renderer tribuffer
+		 //m_pRender->ConvertTri(stuff)
+
 	} 
 
 	//Render img call here

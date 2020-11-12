@@ -58,7 +58,6 @@ public:
 
 	// HW2: Render methods
 	int GzPutAttribute(int numAttributes, GzToken *nameList, GzPointer *valueList);
-	int GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueList);
 
 	// HW3
 	int GzPutCamera(GzCamera camera);
@@ -79,7 +78,6 @@ public:
 	inline int ARRAY(int x, int y){return (x+y*xres);}	/* simplify fbuf indexing */
 	inline short	ctoi(float color) {return(short)((int)(color * ((1 << 12) - 1)));}		/* convert float color to GzIntensity short */
 	bool CheckBounds(const int &i, const int &j) const;
-	inline int* GetTestablePixels(GzCoord* ptr, int &size);
 	inline void FindPixelsInTri(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList, int* pixels, int &size);
 
 	// Object Translation
@@ -90,7 +88,7 @@ public:
 	int GzScaleMat(GzCoord scale, GzMatrix mat);
 
 	//Raytracing
-	int ConvertTri(float, float, float, float, float, float); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
+	int ConvertTri(GzCoord, GzCoord, GzCoord, GzCoord, GzCoord, GzCoord); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 	int RenderImg(); /*Render the image*/
 	int Raycast(); /*Raycasts. Change return to the correct intersection*/
 	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
