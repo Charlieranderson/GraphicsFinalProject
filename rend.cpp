@@ -1141,37 +1141,12 @@ void GzRender::ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel) {
 	worldSpacePixel[2] = -1;
 }
 
-int GzRender::RenderImg() {
-
-	//for every px
-		//intersection = Raycast();
-		//Calculate color at loc
-		//Write to pixelbuffer
-	for (int i = 0; i < xres * yres; i++) {
-		int x = i % yres;
-		int y = i / xres;
-		GzCoord worldSpacePixel;
-		ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
-
-		//need a loop to iterate through all world space triangles
-
-		//Create ray with m_camera position, worldspacePixel position
-		//Check intersections
-
-		//Calculate color, reflections, occlusion for the nearest intersected triangle
-
-	}
-
-
-	return GZ_SUCCESS;
-}
-
 float dotProduct(Point a, Point b)
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
-int FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersectingPoint)
+float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersectingPoint)
 {
 	float a1 = vert1[X] - vert0[X]; //x2 - x1
 	float b1 = vert1[Y] - vert0[Y]; //y2 - y1
@@ -1211,7 +1186,7 @@ int FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoo
 
 	// if denominator=0, no intersect
 	if (dot1 == 0)
-		return GZ_FAILURE;
+		return INT_MAX;
 
 	// find t = -(a*x1 + b*y1 + c*z1 + d) / (a*Vx + b*Vy + c*Vz)
 	float t = -(dot2 + d) / dot1;
@@ -1220,6 +1195,45 @@ int FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoo
 	intersectingPoint[X] = p.x + (t * v.x);
 	intersectingPoint[Y] = p.y + (t * v.y);
 	intersectingPoint[Z] = p.z + (t * v.z);
+
+	return t;
+}
+
+int GzRender::RenderImg() {
+
+	//for every px
+		//intersection = Raycast();
+		//Calculate color at loc
+		//Write to pixelbuffer
+	for (int i = 0; i < xres * yres; i++) {
+		int x = i % yres;
+		int y = i / xres;
+		GzCoord worldSpacePixel;
+		ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
+
+		//TODO: Create ray with m_camera position, worldspacePixel position
+		Ray ray;
+
+		GzCoord intersection, minIntersectPoint;
+		float smallestTValue = INT_MAX;
+		//need a loop to iterate through all world space triangles
+		//Check intersections
+		for (int k = 0; k < tribuffer.size(); k++)
+		{
+			float t = FindIntersection(ray, tribuffer[k].vertOne, tribuffer[k].vertTwo, tribuffer[k].vertThree, intersection);
+
+			// Check for smallest t value
+			if (t <= smallestTValue)
+			{
+				smallestTValue = t;
+				memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+			}
+		}
+
+		// Use variable "minIntersectPoint" in computing color, reflections, etc
+		//Calculate color, reflections, occlusion for the nearest intersected triangle
+
+	}
 
 	return GZ_SUCCESS;
 }
