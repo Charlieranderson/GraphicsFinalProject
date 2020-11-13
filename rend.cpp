@@ -1165,6 +1165,32 @@ float dotProduct(Point a, Point b)
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
+bool crossProduct(const GzCoord v1, const GzCoord v2, GzCoord result)
+{
+	if (v1 == NULL || v2 == NULL)
+		return false;
+
+	if (result == NULL)
+		return false;
+
+	// X = (Y x Z) = i (Yy Zz - Yz Zy) + j (Yz Zx - Yx Zz) + k (Yx Zy - Yy Zx) 
+	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
+	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
+	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
+
+	return true;
+}
+
+float vecMagnitude(GzCoord v)
+{
+	return sqrt(pow(v[X], 2) + pow(v[Y], 2) + pow(v[Z], 2));
+}
+
+bool within01Range(float v)
+{
+	return (0 <= v && v <= 1);
+}
+
 float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersectingPoint)
 {
 	float a1 = vert1[X] - vert0[X]; //x2 - x1
@@ -1243,13 +1269,49 @@ int GzRender::RenderImg() {
 			//Check intersections
 			for (int k = 0; k < tribuffer.size(); k++)
 			{
-				float t = FindIntersection(ray, tribuffer[k].vertOne, tribuffer[k].vertTwo, tribuffer[k].vertThree, intersection);
+				GzTridata singleTriangle = tribuffer[k];
+				GzCoord pointA, pointB, pointC, vecAB, vecAC, vecPA, vecPB, vecPC, ABcrossAC, PBcrossPC, PCcrossPA;
+				memcpy(pointA, singleTriangle.vertOne, sizeof(GzCoord));
+				memcpy(pointB, singleTriangle.vertTwo, sizeof(GzCoord));
+				memcpy(pointC, singleTriangle.vertThree, sizeof(GzCoord));
 
-				// Check for smallest t value
-				if (t <= smallestTValue)
+				float t = FindIntersection(ray, pointA, pointB, pointC, intersection);
+
+				// Ray does not intersect
+				if (t == INT_MAX)
+					continue;
+
+				// Note "intersection" is point P
+				// We find barycentric coords alpha, beta, gamma
+				// https://math.stackexchange.com/questions/4322/check-whether-a-point-is-within-a-3d-triangle/28552#28552
+				// Compute vectors AB, AC, PA, PB, PC
+				for (int c = 0; c < 3; c++)
 				{
-					smallestTValue = t;
-					memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+					vecAB[c] = pointB[c] - pointA[c];
+					vecAC[c] = pointC[c] - pointA[c];
+					vecPA[c] = pointA[c] - intersection[c];
+					vecPB[c] = pointB[c] - intersection[c];
+					vecPC[c] = pointC[c] - intersection[c];
+				}
+
+				crossProduct(vecAB, vecAC, ABcrossAC);
+				crossProduct(vecPB, vecPC, PBcrossPC);
+				crossProduct(vecPC, vecPA, PCcrossPA);
+
+				float areaABC = vecMagnitude(ABcrossAC) / 2;
+				float alpha = (vecMagnitude(PBcrossPC)) / (2 * areaABC);
+				float beta = (vecMagnitude(PCcrossPA)) / (2 * areaABC);
+				float gamma = 1.0f - alpha - beta;
+
+				// Point lies within triangle
+				if (within01Range(alpha) == true && within01Range(beta) == true && within01Range(gamma) == true)
+				{
+					// Check for smallest t value
+					if (t <= smallestTValue)
+					{
+						smallestTValue = t;
+						memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+					}
 				}
 			}
 
