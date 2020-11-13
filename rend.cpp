@@ -303,7 +303,7 @@ int GzRender::GzPutCamera(GzCamera camera)
 	return GZ_SUCCESS;
 }
 
-int GzRender::GzPushMatrix(GzMatrix	matrix, GzMatrix* target, int counter, bool normalizeMatrix)
+int GzRender::GzPushMatrix(GzMatrix	matrix, GzMatrix* target, short &counter, bool normalizeMatrix)
 {
 	/* HW 3.9
 	- push a matrix onto the Ximage stack
@@ -1099,30 +1099,48 @@ void GzRender::GzPhongShading(int* pixels, int &size, GzCoord* vertPtr, GzCoord*
 
 //RAYTRACING CONTENT STARTING HERE. Comments in rend.h
 
-int GzRender::ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord normal1, GzCoord normal2, GzCoord normal3)
+int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 {
-	//vertice transfrom;
+	
+	GzCoord* verts;
+	GzCoord* normals;
 
-	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], point1);
-	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], point2);
-	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], point3);
+	for (int i = 0; i < 3; i++) {
+		if (nameList[i] == GZ_POSITION) {
+			//point1 = (GzCoord*)valueList[i][0];
+			//point2 = (GzCoord*)valueList[i][1];
+			//point3 = (GzCoord*)valueList[i][2];
+			verts = (GzCoord*)valueList[i];
+		}
+		else if (nameList[i] == GZ_NORMAL) {
+			//normal1 = (GzCoord*)valueList[i][0];
+			//normal2 = (GzCoord*)valueList[i][1];
+			//normal3 = (GzCoord*)valueList[i][2];
+			normals = (GzCoord*)valueList[i];
+		}
+	}
 
-	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal1);
-	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal2);
-	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normal3);
+
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], verts[0]);
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[1]);
+	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[2]);
+
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normals[0]);
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normals[1]);
+	MatrixEquations::MatrixVectorMult(Xnorm[normMatLevel - 1], normals[2]);
 
 
 	//put data into gztridata
 	GzTridata data;
-	memcpy(data.vertOne, point1, sizeof(GzCoord));
-	memcpy(data.vertTwo, point2, sizeof(GzCoord));
-	memcpy(data.vertThree, point3, sizeof(GzCoord));
-	memcpy(data.normOne, normal1, sizeof(GzCoord));
-	memcpy(data.normTwo, normal2, sizeof(GzCoord));
-	memcpy(data.normThree, normal3, sizeof(GzCoord));
+	memcpy(data.vertOne, verts[0], sizeof(GzCoord));
+	memcpy(data.vertTwo, verts[1], sizeof(GzCoord));
+	memcpy(data.vertThree, verts[2], sizeof(GzCoord));
+	memcpy(data.normOne, normals[0], sizeof(GzCoord));
+	memcpy(data.normTwo, normals[1], sizeof(GzCoord));
+	memcpy(data.normThree, normals[2], sizeof(GzCoord));
 
 	//store in tribuffer
-	tribuffer.push_back(data); //
+	tribuffer.push_back(data); 
 
 	return GZ_SUCCESS;
 }

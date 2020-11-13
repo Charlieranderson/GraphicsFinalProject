@@ -230,7 +230,7 @@ void CCS580HWView::OnRotate()
 		}
 
 		// Accumulate matrix
-		m_pApplication->m_pRender->GzPushMatrix(rotMat); 
+		//m_pApplication->m_pRender->GzPushMatrix(rotMat, m_pRender->Ximage, m_pRender->matLevel, false);
 	}
 }
 
@@ -267,7 +267,7 @@ void CCS580HWView::OnTranslate()
 		m_pApplication->m_pRender->GzTrxMat(input->translation, trxMat);
 
 		// Accumulate matrix
-		m_pApplication->m_pRender->GzPushMatrix(trxMat); 
+		//m_pApplication->m_pRender->GzPushMatrix(trxMat); 
 	}
 }
 
@@ -301,9 +301,9 @@ void CCS580HWView::OnScale()
 		input->scale[0] = dlg.m_fSx; input->scale[1] = dlg.m_fSy; input->scale[2] = dlg.m_fSz;
 
 		//  Create Scaling Matrix
-		m_pApplication->m_pRender->GzScaleMat(input->scale, scaleMat);
+		//m_pApplication->m_pRender->GzScaleMat(input->scale, scaleMat);
 
 		// Accumulate matrix
-		m_pApplication->m_pRender->GzPushMatrix(scaleMat); 
+		//m_pApplication->m_pRender->GzPushMatrix(scaleMat); 
 	}
 }

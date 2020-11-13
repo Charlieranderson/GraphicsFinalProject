@@ -66,7 +66,7 @@ public:
 
 	// HW3
 	int GzPutCamera(GzCamera camera);
-	int GzPushMatrix(GzMatrix	matrix, GzMatrix* target, int counter, bool normalizeMatrix);
+	int GzPushMatrix(GzMatrix	matrix, GzMatrix* target, short &counter, bool normalizeMatrix);
 	int GzPopMatrix(int counter);
 	int GzDefaultCamera();
 
@@ -97,7 +97,7 @@ public:
 	int RenderImg(); /*Render the image*/
 	int Raycast(); /*Raycasts. Change return to the correct intersection*/
 	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
-	int ConvertTri(GzCoord point1, GzCoord point2, GzCoord point3, GzCoord normal1, GzCoord normal2, GzCoord normal3); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
+	int ConvertTri(GzToken* nameList, GzPointer* valueList); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 
 	// help function for Camera
 	Ray getRay(float s, float t, GzCamera cam);
