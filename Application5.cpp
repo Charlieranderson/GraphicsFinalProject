@@ -21,7 +21,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#define INFILE  "ppot.asc"
+#define INFILE  "tri.asc"
 #define OUTFILE "output.ppm"
 
 
@@ -117,13 +117,20 @@ GzMatrix	rotateY =
 }; 
 
 #if 1 	/* set up app-defined camera if desired, else use camera defaults */
-    camera.position[X] = -3;
-    camera.position[Y] = -25;
-    camera.position[Z] = -4;
+    //camera.position[X] = -3;
+    //camera.position[Y] = -25;
+    //camera.position[Z] = -4; 
+	camera.position[X] = 0;
+    camera.position[Y] = 0;
+    camera.position[Z] = 0;
 
-    camera.lookat[X] = 7.8;
-    camera.lookat[Y] = 0.7;
-    camera.lookat[Z] = 6.5;
+    //camera.lookat[X] = 7.8;
+    //camera.lookat[Y] = 0.7;
+    //camera.lookat[Z] = 6.5;
+
+	camera.lookat[X] = 7.8;
+	camera.lookat[Y] = 0.7;
+	camera.lookat[Z] = 6.5;
 
     camera.worldup[X] = -0.2;
     camera.worldup[Y] = 1.0;

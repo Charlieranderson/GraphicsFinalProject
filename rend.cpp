@@ -1312,21 +1312,37 @@ int GzRender::RenderImg() {
 		//intersection = Raycast();
 		//Calculate color at loc
 		//Write to pixelbuffer
-	for (int row = yres - 1; row >= 0; --row)
-	{
-		for (int col = 0; col < xres; ++col)
-		{
-			float x = col / xres;
-			float y = row / yres;
+	for(int i = 0; i < xres * yres; i++){
+
+			int x = i / xres;
+			int y = i % xres;
 			GzCoord worldSpacePixel;
 			ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
 
 			//TODO: Create ray with m_camera position, worldspacePixel position
-			CameraUpdate(m_camera);
-			Ray ray = getRay(x, y, m_camera);
+			//CameraUpdate(m_camera);
+			//Ray ray = getRay(worldSpacePixel, m_camera);
+
+			Point Pos, Dir;
+			Pos.x = m_camera.position[0];
+			Pos.y = m_camera.position[1];
+			Pos.z = m_camera.position[2];
+
+			//Dir.x = cam.lowerLeftCorner[0] + cam.horizontal[0] * s + cam.vertical[0] * t - cam.position[0];
+			//Dir.y = cam.lowerLeftCorner[1] + cam.horizontal[1] * s + cam.vertical[1] * t - cam.position[1];
+			//Dir.z = cam.lowerLeftCorner[2] + cam.horizontal[2] * s + cam.vertical[2] * t - cam.position[2];
+
+			Dir.x = worldSpacePixel[X] - m_camera.position[X];
+			Dir.y = worldSpacePixel[Y] - m_camera.position[Y];
+			Dir.z = worldSpacePixel[Z] - m_camera.position[Z];
+
+
+			Ray ray = Ray(Pos, Dir);
+
+
 			GzColor color = { 0,0,0 };
 			CalculateColorRaytrace(ray, 1, color);
-			GzPut(row, col, ctoi(color[RED]), ctoi(color[GREEN]), ctoi(color[BLUE]), 1, 0);
+			GzPut(x, y, ctoi(color[RED]), ctoi(color[GREEN]), ctoi(color[BLUE]), 1, 0);
 			/*
 			GzCoord intersection, minIntersectPoint;
 			float smallestTValue = INT_MAX;
@@ -1383,7 +1399,7 @@ int GzRender::RenderImg() {
 			// Use variable "minIntersectPoint" in computing color, reflections, etc
 			//Calculate color, reflections, occlusion for the nearest intersected triangle
 			*/
-		}
+		
 	}
 
 	return GZ_SUCCESS;
@@ -1419,16 +1435,23 @@ int GzRender::CameraUpdate(GzCamera cam)
 
 	return GZ_SUCCESS;
 }
-Ray GzRender::getRay(float s, float t, GzCamera cam)
-{
-	Point Pos, Dir;
-	Pos.x = cam.position[0];
-	Pos.y = cam.position[1];
-	Pos.z = cam.position[2];
 
-	Dir.x = cam.lowerLeftCorner[0] + cam.horizontal[0] * s + cam.vertical[0] * t - cam.position[0];
-	Dir.y = cam.lowerLeftCorner[1] + cam.horizontal[1] * s + cam.vertical[1] * t - cam.position[1];
-	Dir.z = cam.lowerLeftCorner[2] + cam.horizontal[2] * s + cam.vertical[2] * t - cam.position[2];
-
-	return Ray(Pos, Dir);
-}
+//Ray GzRender::getRay(GzCoord pixelLocation, GzCamera cam)
+//{
+//	//Point Pos, Dir;
+//	//Pos.x = cam.position[0];
+//	//Pos.y = cam.position[1];
+//	//Pos.z = cam.position[2];
+//
+//	////Dir.x = cam.lowerLeftCorner[0] + cam.horizontal[0] * s + cam.vertical[0] * t - cam.position[0];
+//	////Dir.y = cam.lowerLeftCorner[1] + cam.horizontal[1] * s + cam.vertical[1] * t - cam.position[1];
+//	////Dir.z = cam.lowerLeftCorner[2] + cam.horizontal[2] * s + cam.vertical[2] * t - cam.position[2];
+//
+//	//Dir.x = pixelLocation[X] - cam.position[X];
+//	//Dir.y = pixelLocation[Y] - cam.position[Y];
+//	//Dir.z = pixelLocation[Z] - cam.position[Z];
+//
+//
+//	//return Ray(Pos, Dir);
+//	return Ray(0, 0);
+//}

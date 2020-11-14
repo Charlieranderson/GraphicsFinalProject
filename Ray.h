@@ -48,7 +48,7 @@ public:
 	Point PointAt(float t);
 
 	//Normalizes vector made by point - origin
-	void Normalize(Point input);
+	void Normalize(Point &input);
 
 	//multiplies vector by scalar 
 	Point VectorMult(Point x, float t); 
