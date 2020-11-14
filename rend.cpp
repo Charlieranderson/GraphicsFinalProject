@@ -288,12 +288,6 @@ int GzRender::GzPutCamera(GzCamera camera)
 	/*- overwrite renderer camera structure with new camera definition
 	*/
 
-	//Move the camera to worldspace.
-	MatrixEquations::MatrixVectorMult(Xwi, camera.lookat);
-	MatrixEquations::MatrixVectorMult(Xwi, camera.position);
-	MatrixEquations::MatrixVectorMult(Xwi, camera.worldup);
-
-
 	m_camera.FOV = camera.FOV;
 	m_camera.aspect = yres / xres;
 	memcpy(m_camera.lookat, camera.lookat, sizeof(GzCoord));
@@ -410,7 +404,7 @@ int GzRender::GzFlushDisplay2FrameBuffer()
 		- CAUTION: when storing the pixels into the frame buffer, the order is blue, green, and red
 		- NOT red, green, and blue !!!
 	*/
-	RenderImg();
+	
 	int pixelIndex;
 
 	for (int i = 0; i < xres*yres * 3; i += 3) {
@@ -1020,15 +1014,11 @@ int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 
 	for (int i = 0; i < 3; i++) {
 		if (nameList[i] == GZ_POSITION) {
-			//point1 = (GzCoord*)valueList[i][0];
-			//point2 = (GzCoord*)valueList[i][1];
-			//point3 = (GzCoord*)valueList[i][2];
+
 			verts = (GzCoord*)valueList[i];
 		}
 		else if (nameList[i] == GZ_NORMAL) {
-			//normal1 = (GzCoord*)valueList[i][0];
-			//normal2 = (GzCoord*)valueList[i][1];
-			//normal3 = (GzCoord*)valueList[i][2];
+
 			normals = (GzCoord*)valueList[i];
 		}
 	}
@@ -1335,7 +1325,7 @@ int GzRender::RenderImg() {
 			CameraUpdate(m_camera);
 			Ray ray = getRay(x, y, m_camera);
 			GzColor color = { 0,0,0 };
-			CalculateColorRaytrace(ray, 0, color);
+			CalculateColorRaytrace(ray, 1, color);
 			GzPut(row, col, ctoi(color[RED]), ctoi(color[GREEN]), ctoi(color[BLUE]), 1, 0);
 			/*
 			GzCoord intersection, minIntersectPoint;

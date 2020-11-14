@@ -65,7 +65,7 @@ void MatrixEquations::NormalizeVectorThree(float vector[]) {
 }
 
 //takes a gzcoord, sets value 4 to 1, does vector/matrix mult, converts to 3D space.
-bool MatrixEquations::MatrixVectorMult(GzMatrix mat, GzCoord coord) {
+void MatrixEquations::MatrixVectorMult(GzMatrix mat, GzCoord coord) {
 
 	float tempArray[4];
 
@@ -78,10 +78,7 @@ bool MatrixEquations::MatrixVectorMult(GzMatrix mat, GzCoord coord) {
 	coord[Y] = tempArray[Y] / tempArray[3];
 	coord[Z] = tempArray[Z] / tempArray[3];
 
-	if (tempArray[Z] < 0) {
-		return false; //bool is for Z value if it is behind camera
-	}
-	return true;
+
 }
 
 //Assumes size 3 vector

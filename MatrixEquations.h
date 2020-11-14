@@ -23,7 +23,7 @@ public:
 	static void NormalizeVectorThree(float vector[]);
 	
 	//Return is in GzCoord
-	static bool MatrixVectorMult(GzMatrix, GzCoord);
+	static void MatrixVectorMult(GzMatrix, GzCoord);
 
 	//Calculates the cross product
 	static void CrossProduct(float* vecOne, float* vecTwo, float* returnVal);

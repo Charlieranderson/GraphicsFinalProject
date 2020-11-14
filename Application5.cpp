@@ -429,6 +429,8 @@ int Application5::Render()
 
 	//Render img call here
 
+	m_pRender->RenderImg();
+
 	m_pRender->GzFlushDisplay2File(outfile); 	/* write out or update display to file*/
 	m_pRender->GzFlushDisplay2FrameBuffer();	// write out or update display to frame buffer
 
