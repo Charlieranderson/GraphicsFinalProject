@@ -410,6 +410,7 @@ int GzRender::GzFlushDisplay2FrameBuffer()
 		- CAUTION: when storing the pixels into the frame buffer, the order is blue, green, and red
 		- NOT red, green, and blue !!!
 	*/
+	RenderImg();
 	int pixelIndex;
 
 	for (int i = 0; i < xres*yres * 3; i += 3) {
@@ -679,94 +680,6 @@ void GzRender::CalculateGouraudColor(float normal[3], float returnColor[3]) {
 	returnColor[GREEN] = specularComponentG + diffuseComponentG + ambientlight.color[GREEN];
 	returnColor[BLUE] = specularComponentB + diffuseComponentB + ambientlight.color[BLUE];
 
-}
-
-void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
-	//Recursively search for rays and reflection/refraction ray
-	Ray reflec, refrac;
-	GzColor spec, diff;
-	GzColor Kr, Kt;
-	GzColor intensity;
-	//Something = FindIntersecion
-	GzCoord intersection = { 0,0,0 };
-	int Something; //Return of Findintersection
-	//normal of hit thing
-	GzCoord normal = { 0,0,0 };
-	if (Something != -1) {
-		// Do PhongIllumination(ray,normal,intensity) to get intensity
-		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
-		{
-			GetReflection(&ray, normal, intersection, &reflec);
-
-			if (depth <= 5) {
-				CalculateColorRaytrace(reflec, depth + 1, spec);
-				for (int i = 0; i < 3; ++i) {
-					spec[i] *= Kr[i] / depth;
-				}
-			}
-			else {
-				for (int i = 0; i < 3; ++i) {
-					spec[i] *= 0;
-				}
-			}
-		}
-
-		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
-		{
-			GetRefraction(&ray, normal, intersection, &refrac);
-
-			if (depth <= 5) {
-				CalculateColorRaytrace(refrac, depth + 1, diff);
-				for (int i = 0; i < 3; ++i) {
-					diff[i] *= Kt[i] / depth;
-				}
-			}
-			else {
-				for (int i = 0; i < 3; ++i) {
-					diff[i] *= 0;
-				}
-			}
-		}
-		for (int i = 0; i < 3; ++i) {
-			intensity[i] = spec[i] + diff[i] + intensity[i];
-		}
-	}
-	else {
-		for (int i = 0; i < 3; ++i) {
-			intensity[i] = 0;
-		}
-	}
-
-
-}
-
-void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
-{
-	Point new_origin;
-	Point new_dir;
-	float RdotN;
-	//need to fix this float RdotN = dotProduct(normal, ray->getDirection());
-	if (RdotN > 0) {
-		for (int i = 0; i < 3; ++i)
-			normal[i] *= -1;
-		//need to fix this float RdotN = dotProduct(normal, ray->getDirection());
-
-	}
-	new_dir.x = ray->getDirection().x - (2 * abs(RdotN)* normal[X]);
-	new_dir.y = ray->getDirection().y - (2 * abs(RdotN)* normal[Y]);
-	new_dir.z = ray->getDirection().z - (2 * abs(RdotN)* normal[Z]);
-	ray->Normalize(new_dir);
-	new_origin.x = hitPoint[X] + 1 * new_dir.x;
-	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
-	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
-	reflection = &Ray(new_origin, new_dir);
-	return;
-}
-
-void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
-{
-	refraction = &Ray(ray->PointAt(1), ray->getDirection());
-	return;
 }
 
 void ColorOverflowCorrection(float colorValue[3]) {
@@ -1244,6 +1157,165 @@ float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzC
 	return t;
 }
 
+void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
+	//Recursively search for rays and reflection/refraction ray
+	Ray reflec, refrac;
+	GzColor spec, diff;
+	GzColor Kr, Kt;
+	Kr[RED] = 0.5;
+	Kr[GREEN] = 0.5;
+	Kr[BLUE] = 0.5;
+
+	Kt[RED] = 0.1;
+	Kt[GREEN] = 0.1;
+	Kt[BLUE] = 0.1;
+	GzColor intensity;
+	//Something = FindIntersecion
+	GzCoord intersection, minIntersectPoint;
+	float smallestTValue = INT_MAX;
+	//need a loop to iterate through all world space triangles
+	//Check intersections
+	GzCoord normA, normB, normC, pA, pB, pC;
+	for (int k = 0; k < tribuffer.size(); k++)
+	{
+		GzTridata singleTriangle = tribuffer[k];
+		GzCoord pointA, pointB, pointC, vecAB, vecAC, vecPA, vecPB, vecPC, ABcrossAC, PBcrossPC, PCcrossPA;
+		memcpy(pointA, singleTriangle.vertOne, sizeof(GzCoord));
+		memcpy(pointB, singleTriangle.vertTwo, sizeof(GzCoord));
+		memcpy(pointC, singleTriangle.vertThree, sizeof(GzCoord));
+
+		float t = FindIntersection(ray, pointA, pointB, pointC, intersection);
+
+		// Ray does not intersect
+		if (t == INT_MAX)
+			continue;
+
+		// Note "intersection" is point P
+		// We find barycentric coords alpha, beta, gamma
+		// https://math.stackexchange.com/questions/4322/check-whether-a-point-is-within-a-3d-triangle/28552#28552
+		// Compute vectors AB, AC, PA, PB, PC
+		for (int c = 0; c < 3; c++)
+		{
+			vecAB[c] = pointB[c] - pointA[c];
+			vecAC[c] = pointC[c] - pointA[c];
+			vecPA[c] = pointA[c] - intersection[c];
+			vecPB[c] = pointB[c] - intersection[c];
+			vecPC[c] = pointC[c] - intersection[c];
+		}
+
+		crossProduct(vecAB, vecAC, ABcrossAC);
+		crossProduct(vecPB, vecPC, PBcrossPC);
+		crossProduct(vecPC, vecPA, PCcrossPA);
+
+		float areaABC = vecMagnitude(ABcrossAC) / 2;
+		float alpha = (vecMagnitude(PBcrossPC)) / (2 * areaABC);
+		float beta = (vecMagnitude(PCcrossPA)) / (2 * areaABC);
+		float gamma = 1.0f - alpha - beta;
+
+		// Point lies within triangle
+		if (within01Range(alpha) == true && within01Range(beta) == true && within01Range(gamma) == true)
+		{
+			// Check for smallest t value
+			if (t <= smallestTValue)
+			{
+				smallestTValue = t;
+				memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+				memcpy(normA, singleTriangle.normOne, sizeof(GzCoord));
+				memcpy(normB, singleTriangle.normTwo, sizeof(GzCoord));
+				memcpy(normC, singleTriangle.normThree, sizeof(GzCoord));
+				memcpy(pA, singleTriangle.vertOne, sizeof(GzCoord));
+				memcpy(pB, singleTriangle.vertTwo, sizeof(GzCoord));
+				memcpy(pC, singleTriangle.vertThree, sizeof(GzCoord));
+			}
+		}
+	}
+	//float xValueCoefficients[4];
+	//float yValueCoefficients[4];
+	//float zValueCoefficients[4];
+	//GetNormalCoefficients(vertPtr, normals, xValueCoefficients, yValueCoefficients, zValueCoefficients);
+	//supposseed to interpolate but will just be flat for now
+	GzCoord normal = { 0,0,0 };
+	memcpy(normal, normA, sizeof(GzCoord));
+	if (smallestTValue < INT_MAX) {
+		CalculatePhongColor(normal, intensity, Kd, Ka);
+		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
+		{
+			GetReflection(&ray, normal, intersection, &reflec);
+
+			if (depth <= 5) {
+				CalculateColorRaytrace(reflec, depth + 1, spec);
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= Kr[i] / depth;
+				}
+			}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= 0;
+				}
+			}
+		}
+
+		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
+		{
+			GetRefraction(&ray, normal, intersection, &refrac);
+
+			if (depth <= 5) {
+				CalculateColorRaytrace(refrac, depth + 1, diff);
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= Kt[i] / depth;
+				}
+			}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= 0;
+				}
+			}
+		}
+		for (int i = 0; i < 3; ++i) {
+			intensity[i] = spec[i] + diff[i] + intensity[i];
+		}
+	}
+	else {
+		for (int i = 0; i < 3; ++i) {
+			intensity[i] = 0;
+		}
+	}
+	memcpy(returnColor, intensity, sizeof(GzColor));
+
+
+}
+
+void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
+{
+	Point new_origin;
+	Point new_dir;
+	float RdotN;
+	Point normal_;
+	normal_.x = normal[0];
+	normal_.y = normal[1];
+	normal_.z = normal[2];
+	RdotN = dotProduct(normal_, ray->getDirection());
+	if (RdotN > 0) {
+		for (int i = 0; i < 3; ++i)
+			normal[i] *= -1;
+
+	}
+	new_dir.x = ray->getDirection().x - (2 * abs(RdotN)* normal[X]);
+	new_dir.y = ray->getDirection().y - (2 * abs(RdotN)* normal[Y]);
+	new_dir.z = ray->getDirection().z - (2 * abs(RdotN)* normal[Z]);
+	ray->Normalize(new_dir);
+	new_origin.x = hitPoint[X] + 1 * new_dir.x;
+	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
+	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
+	reflection = &Ray(new_origin, new_dir);
+	return;
+}
+
+void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
+{
+	refraction = &Ray(ray->PointAt(1), ray->getDirection());
+	return;
+}
 int GzRender::RenderImg() {
 
 	//for every px
@@ -1262,7 +1334,10 @@ int GzRender::RenderImg() {
 			//TODO: Create ray with m_camera position, worldspacePixel position
 			CameraUpdate(m_camera);
 			Ray ray = getRay(x, y, m_camera);
-
+			GzColor color = { 0,0,0 };
+			CalculateColorRaytrace(ray, 0, color);
+			GzPut(row, col, ctoi(color[RED]), ctoi(color[GREEN]), ctoi(color[BLUE]), 1, 0);
+			/*
 			GzCoord intersection, minIntersectPoint;
 			float smallestTValue = INT_MAX;
 			//need a loop to iterate through all world space triangles
@@ -1317,7 +1392,7 @@ int GzRender::RenderImg() {
 
 			// Use variable "minIntersectPoint" in computing color, reflections, etc
 			//Calculate color, reflections, occlusion for the nearest intersected triangle
-
+			*/
 		}
 	}
 
