@@ -326,8 +326,16 @@ int Application5::Render()
 	//	}
 	//	else if (type == "f") {
 	//		std::string x, y, z;
-	//		in >> x >> y >> z;
-	//		triangles.push_back({ x,y,z });
+	//		in >> x >> y >> z >> e;
+	//		if (e!="") {
+			//	triangles.push_back({ x,y,z });
+			//	triangles.push_back({ y,z,e });
+			//	triangles.push_back({ z,e,x });
+			//	triangles.push_back({ e,x,y });
+			//}
+    //      else {
+			//	triangles.push_back({ x,y,z });
+			//}
 	//	}
 
 	//}
