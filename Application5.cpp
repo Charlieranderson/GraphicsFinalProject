@@ -142,7 +142,7 @@ int Application5::Initialize()
 
     camera.lookat[X] = 0;
     camera.lookat[Y] = 0;
-    camera.lookat[Z] = 0;
+    camera.lookat[Z] = -1;
 
 	//camera.lookat[X] = 0;
 	//camera.lookat[Y] = 0;
@@ -183,12 +183,12 @@ int Application5::Initialize()
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
         nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[2] = (GzPointer)&light3;
-        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
+        valueListLights[2] = (GzPointer)&light3; 
+
 
         nameListLights[0] = GZ_AMBIENT_LIGHT;
         valueListLights[0] = (GzPointer)&ambientlight;
-        status |= m_pRender->GzPutAttribute(1, nameListLights, valueListLights);
+        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
 
         /*
          * Tokens associated with shading 

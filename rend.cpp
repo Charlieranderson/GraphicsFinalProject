@@ -1328,6 +1328,27 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 				}
 			}
 		}
+		if (DProduct(Pnormal, temp1) < 0)
+		{
+			if (DProduct(Pnormal, temp2) < 0)
+			{
+				if (DProduct(Pnormal, temp3) < 0)
+				{
+					if (t <= smallestTValue)
+					{
+						smallestTValue = t;
+						memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+						memcpy(normA, v1, sizeof(GzCoord));
+						memcpy(normB, v2, sizeof(GzCoord));
+						memcpy(normC, v3, sizeof(GzCoord));
+						memcpy(pA, n1, sizeof(GzCoord));
+						memcpy(pB, n2, sizeof(GzCoord));
+						memcpy(pC, n3, sizeof(GzCoord));
+
+					}
+				}
+			}
+		}
 	
 	}
 	
@@ -1341,7 +1362,6 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		if (smallestTValue < INT_MAX) 
 		{
 			CalculatePhongColor(normal, intensity, Kd, Ka);
-			
 		}
 		else {
 
