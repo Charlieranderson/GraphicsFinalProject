@@ -847,23 +847,23 @@ void GzRender::GzGouraudShading(int* pixels, int &size, GzCoord* vertPtr, GzCoor
 }
 
 
-void GetNormalCoefficients(GzCoord* vertPtr, GzCoord* normals, float xValueCoefficients[4], float yValueCoefficients[4], float zValueCoefficients[4]) {
+void GetNormalCoefficients(GzCoord vertA, GzCoord vertB, GzCoord vertC, GzCoord normA, GzCoord normB, GzCoord normC, float xValueCoefficients[4], float yValueCoefficients[4], float zValueCoefficients[4]) {
 
 	//Create normal coefficients
 
-	float normalXOne[3] = { vertPtr[0][0], vertPtr[0][1], normals[0][0] };
-	float normalXTwo[3] = { vertPtr[1][0], vertPtr[1][1], normals[1][0] };
-	float normalXThree[3] = { vertPtr[2][0], vertPtr[2][1], normals[2][0] };
+	float normalXOne[3] = { vertA[0], vertA[1],normA[0] };
+	float normalXTwo[3] = { vertB[0], vertB[1], normB[0] };
+	float normalXThree[3] = { vertC[0], vertC[1], normC[0] };
 	LineEquations::GetPlaneCoefficients(normalXOne, normalXTwo, normalXThree, xValueCoefficients);
 
-	float normalYOne[3] = { vertPtr[0][0], vertPtr[0][1], normals[0][1] };
-	float normalYTwo[3] = { vertPtr[1][0], vertPtr[1][1], normals[1][1] };
-	float normalYThree[3] = { vertPtr[2][0], vertPtr[2][1], normals[2][1] };
+	float normalYOne[3] = { vertA[0], vertA[1], normA[1] };
+	float normalYTwo[3] = { vertB[0], vertB[1], normB[1] };
+	float normalYThree[3] = { vertC[0], vertC[1], normC[1] };
 	LineEquations::GetPlaneCoefficients(normalYOne, normalYTwo, normalYThree, yValueCoefficients);
 
-	float normalZOne[3] = { vertPtr[0][0], vertPtr[0][1], normals[0][2] };
-	float normalZTwo[3] = { vertPtr[1][0], vertPtr[1][1], normals[1][2] };
-	float normalZThree[3] = { vertPtr[2][0], vertPtr[2][1], normals[2][2] };
+	float normalZOne[3] = { vertA[0], vertA[1], normA[2] };
+	float normalZTwo[3] = { vertB[0], vertB[1], normB[2] };
+	float normalZThree[3] = { vertC[0],vertC[1], normC[2] };
 	LineEquations::GetPlaneCoefficients(normalZOne, normalZTwo, normalZThree, zValueCoefficients);
 }
 
@@ -936,7 +936,7 @@ void GzRender::GzPhongShading(int* pixels, int &size, GzCoord* vertPtr, GzCoord*
 	float xValueCoefficients[4];
 	float yValueCoefficients[4];
 	float zValueCoefficients[4];
-	GetNormalCoefficients(vertPtr, normals, xValueCoefficients, yValueCoefficients, zValueCoefficients);
+	//GetNormalCoefficients(vertPtr, normals, xValueCoefficients, yValueCoefficients, zValueCoefficients);
 
 	float uValueCoefficients[4];
 	float vValueCoefficients[4];
@@ -1238,18 +1238,17 @@ void GzRender::sort()
 
 void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
 	//Recursively search for rays and reflection/refraction ray
-	//Ray reflec, refrac;
-	//GzColor spec, diff;
-	//GzColor Kr, Kt;
-	//Kr[RED] = 0.5;
-	//Kr[GREEN] = 0.5;
-	//Kr[BLUE] = 0.5;
+	Ray reflec, refrac;
+	GzColor spec, diff;
+	GzColor Kr, Kt;
+	Kr[RED] = 0.5;
+	Kr[GREEN] = 0.5;
+	Kr[BLUE] = 0.5;
 
-	//Kt[RED] = 0.1;
-	//Kt[GREEN] = 0.1;
-	//Kt[BLUE] = 0.1;
+	Kt[RED] = 0.1;
+	Kt[GREEN] = 0.1;
+	Kt[BLUE] = 0.1;
 	GzColor intensity;
-	//Something = FindIntersecion
 	
 	float smallestTValue = INT_MAX;
 	//need a loop to iterate through all world space triangles
@@ -1340,14 +1339,52 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	//float zValueCoefficients[4];
 	//GetNormalCoefficients(vertPtr, normals, xValueCoefficients, yValueCoefficients, zValueCoefficients);
 	//supposseed to interpolate but will just be flat for now
-		GzCoord normal = { 0,0,0 };
-		memcpy(normal, normA, sizeof(GzCoord));
+		float xValueCoefficients[4];
+		float yValueCoefficients[4];
+		float zValueCoefficients[4];
+		GetNormalCoefficients(pA, pB, pC, normA, normB, normC, xValueCoefficients, yValueCoefficients, zValueCoefficients);
+		float normal[3] = { LineEquations::InterpolateZ(xValueCoefficients, intersection['X'], intersection['Y']),
+								LineEquations::InterpolateZ(yValueCoefficients, intersection['X'], intersection['Y']),
+								LineEquations::InterpolateZ(zValueCoefficients, intersection['X'], intersection['Y']), };
 		if (smallestTValue < INT_MAX) 
 		{
 			CalculatePhongColor(normal, intensity, Kd, Ka);
-			//intensity[0] = 1;
-			//intensity[1] = 1;
-			//intensity[2] = 1;
+			if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
+			{
+				GetReflection(&ray, normal, intersection, &reflec);
+
+				if (depth <= 5) {
+					CalculateColorRaytrace(reflec, depth + 1, spec);
+					for (int i = 0; i < 3; ++i) {
+						spec[i] *= Kr[i] / depth;
+					}
+				}
+				else {
+					for (int i = 0; i < 3; ++i) {
+						spec[i] *= 0;
+					}
+				}
+			}
+
+			if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
+			{
+				GetRefraction(&ray, normal, intersection, &refrac);
+
+				if (depth <= 5) {
+					CalculateColorRaytrace(refrac, depth + 1, diff);
+					for (int i = 0; i < 3; ++i) {
+						diff[i] *= Kt[i] / depth;
+					}
+				}
+				else {
+					for (int i = 0; i < 3; ++i) {
+						diff[i] *= 0;
+					}
+				}
+			}
+			for (int i = 0; i < 3; ++i) {
+				intensity[i] = spec[i] + diff[i] + intensity[i];
+			}
 		}
 		else {
 
