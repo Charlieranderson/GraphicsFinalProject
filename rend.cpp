@@ -1257,7 +1257,6 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	for (int k = 0; k < tribuffer.size(); k++)
 	{
 		GzTridata singleTriangle = tribuffer[k];
-		GzCoord  vecAB, vecAC, vecPA, vecPB, vecPC, ABcrossAC, PBcrossPC, PCcrossPA;
 		memcpy(vert1, singleTriangle.vertOne, sizeof(GzCoord));
 		memcpy(vert2, singleTriangle.vertTwo, sizeof(GzCoord));
 		memcpy(vert3, singleTriangle.vertThree, sizeof(GzCoord));
@@ -1343,9 +1342,9 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		float yValueCoefficients[4];
 		float zValueCoefficients[4];
 		GetNormalCoefficients(pA, pB, pC, normA, normB, normC, xValueCoefficients, yValueCoefficients, zValueCoefficients);
-		float normal[3] = { LineEquations::InterpolateZ(xValueCoefficients, intersection['X'], intersection['Y']),
-								LineEquations::InterpolateZ(yValueCoefficients, intersection['X'], intersection['Y']),
-								LineEquations::InterpolateZ(zValueCoefficients, intersection['X'], intersection['Y']), };
+		float normal[3] = { LineEquations::InterpolateZ(xValueCoefficients, intersection[X], intersection[Y]),
+								LineEquations::InterpolateZ(yValueCoefficients, intersection[X], intersection[Y]),
+								LineEquations::InterpolateZ(zValueCoefficients, intersection[X], intersection[Y]), };
 		if (smallestTValue < INT_MAX) 
 		{
 			CalculatePhongColor(normal, intensity, Kd, Ka);
