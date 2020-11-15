@@ -1236,7 +1236,6 @@ void GzRender::sort()
 
 }
 
-
 void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
 	//Recursively search for rays and reflection/refraction ray
 	//Ray reflec, refrac;
@@ -1269,12 +1268,19 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 
 		FindIntersection(ray, vert1, vert2, vert3);
 
-		// Ray does not intersect
+		// Ray does not intersect or is behind the triangle
 		if (t == INT_MAX || t < 0)
 			continue;
 
-		sort();
-		
+		//sort();
+
+		memcpy(v1, vert1, sizeof(GzCoord));
+		memcpy(v2, vert2, sizeof(GzCoord));
+		memcpy(v3, vert3, sizeof(GzCoord));
+		memcpy(n1, singleTriangle.normOne, sizeof(GzCoord));
+		memcpy(n2, singleTriangle.normTwo, sizeof(GzCoord));
+		memcpy(n3, singleTriangle.normThree, sizeof(GzCoord));
+
 		edge1[X] = v2[X] - v1[X];
 		edge1[Y] = v2[Y] - v1[Y];
 		edge1[Z] = v2[Z] - v1[Z];
@@ -1299,7 +1305,7 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		C2[Y] = intersection[Y] - v3[Y];
 		C2[Z] = intersection[Z] - v3[Z];
         
-		GzCoord temp1,temp2, temp3;
+		GzCoord temp1, temp2, temp3;
 		crossProduct(edge1, C0, temp1);
 		crossProduct(edge2, C1, temp2);
 		crossProduct(edge3, C2, temp3);
@@ -1307,49 +1313,26 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		Pnormal[X] = plane.normal.x;
 		Pnormal[Y] = plane.normal.y;
 		Pnormal[Z] = plane.normal.z;
-		if (DProduct(Pnormal, temp1) > 0) 
-		{
-			if (DProduct(Pnormal, temp2) > 0) 
-			{
-				if (DProduct(Pnormal, temp3) > 0) 
-				{
-					if (t <= smallestTValue)
-					{
-						smallestTValue = t;
-						memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
-						memcpy(normA, v1, sizeof(GzCoord));
-						memcpy(normB, v2, sizeof(GzCoord));
-						memcpy(normC, v3, sizeof(GzCoord));
-						memcpy(pA, n1, sizeof(GzCoord));
-						memcpy(pB, n2, sizeof(GzCoord));
-						memcpy(pC, n3, sizeof(GzCoord));
 
-					}
-				}
+		float dProduct1 = DProduct(Pnormal, temp1);
+		float dProduct2 = DProduct(Pnormal, temp2);
+		float dProduct3 = DProduct(Pnormal, temp3);
+
+		if ((dProduct1 < 0 && dProduct2 < 0 && dProduct3 < 0) || (dProduct1 > 0 && dProduct2 > 0 && dProduct3 > 0))
+		{
+			if (t <= smallestTValue)
+			{
+				smallestTValue = t;
+				memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+				memcpy(pA, v1, sizeof(GzCoord));
+				memcpy(pB, v2, sizeof(GzCoord));
+				memcpy(pC, v3, sizeof(GzCoord));
+				memcpy(normA, n1, sizeof(GzCoord));
+				memcpy(normB, n2, sizeof(GzCoord));
+				memcpy(normC, n3, sizeof(GzCoord));
+
 			}
 		}
-		if (DProduct(Pnormal, temp1) < 0)
-		{
-			if (DProduct(Pnormal, temp2) < 0)
-			{
-				if (DProduct(Pnormal, temp3) < 0)
-				{
-					if (t <= smallestTValue)
-					{
-						smallestTValue = t;
-						memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
-						memcpy(normA, v1, sizeof(GzCoord));
-						memcpy(normB, v2, sizeof(GzCoord));
-						memcpy(normC, v3, sizeof(GzCoord));
-						memcpy(pA, n1, sizeof(GzCoord));
-						memcpy(pB, n2, sizeof(GzCoord));
-						memcpy(pC, n3, sizeof(GzCoord));
-
-					}
-				}
-			}
-		}
-	
 	}
 	
 	//float xValueCoefficients[4];
@@ -1362,6 +1345,9 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		if (smallestTValue < INT_MAX) 
 		{
 			CalculatePhongColor(normal, intensity, Kd, Ka);
+			//intensity[0] = 1;
+			//intensity[1] = 1;
+			//intensity[2] = 1;
 		}
 		else {
 
