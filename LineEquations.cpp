@@ -3,8 +3,8 @@
 #include "MatrixEquations.h"
 #include <iostream>
 
-void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList) {
-	//GzCoord temp;
+void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
+
 	float* currentPtr, *nextVal;
 	bool topBottomRelationship = false;
 	float topBottomVal;
@@ -22,7 +22,6 @@ void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex*
 			if (*currentPtr > *nextVal) {
 				std::swap(ptr[i], ptr[j]);
 				std::swap(normalPtr[i], normalPtr[j]);
-				std::swap(uvList[i], uvList[j]);
 			}
 			else if (*currentPtr == *nextVal) {
 				topBottomRelationship = true;
@@ -49,7 +48,6 @@ void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex*
 
 				std::swap(ptr[0], ptr[1]);
 				std::swap(normalPtr[0], normalPtr[1]);
-				std::swap(uvList[0], uvList[1]);
 
 			}
 		}
@@ -60,7 +58,6 @@ void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex*
 
 				std::swap(ptr[1], ptr[2]);
 				std::swap(normalPtr[1], normalPtr[2]);
-				std::swap(uvList[1], uvList[2]);
 
 			}
 		}
@@ -77,7 +74,6 @@ void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex*
 		if (xVal > *currentPtr) {
 			std::swap(ptr[0], ptr[1]);
 			std::swap(normalPtr[0], normalPtr[1]);
-			std::swap(uvList[0], uvList[1]);
 		}
 	}
 

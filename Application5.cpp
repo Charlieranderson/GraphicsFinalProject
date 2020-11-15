@@ -92,29 +92,45 @@ int Application5::Initialize()
 	m_pFrameBuffer = m_pRender->framebuffer; 
 
 /* Translation matrix */
-GzMatrix	scale = 
-{ 
-	3.25,	0.0,	0.0,	0.0, 
-	0.0,	3.25,	0.0,	-3.25, 
-	0.0,	0.0,	3.25,	3.5, 
-	0.0,	0.0,	0.0,	1.0 
-}; 
- 
-GzMatrix	rotateX = 
+//GzMatrix	scale = 
+//{ 
+//	3.25,	0.0,	0.0,	0.0, 
+//	0.0,	3.25,	0.0,	-3.25, 
+//	0.0,	0.0,	3.25,	3.5, 
+//	0.0,	0.0,	0.0,	1.0 
+//}; 
+// 
+//GzMatrix	rotateX = 
+//{ 
+//	1.0,	0.0,	0.0,	0.0, 
+//	0.0,	.7071,	.7071,	0.0, 
+//	0.0,	-.7071,	.7071,	0.0, 
+//	0.0,	0.0,	0.0,	1.0 
+//}; 
+// 
+//GzMatrix	rotateY = 
+//{ 
+//	.866,	0.0,	-0.5,	0.0, 
+//	0.0,	1.0,	0.0,	0.0, 
+//	0.5,	0.0,	.866,	0.0, 
+//	0.0,	0.0,	0.0,	1.0 
+//}; 
+
+	GzMatrix	rotateX = 
 { 
 	1.0,	0.0,	0.0,	0.0, 
-	0.0,	.7071,	.7071,	0.0, 
-	0.0,	-.7071,	.7071,	0.0, 
+	0.0,	1,	0,	0.0, 
+	0.0,	0,	1,	0.0, 
 	0.0,	0.0,	0.0,	1.0 
 }; 
- 
-GzMatrix	rotateY = 
-{ 
-	.866,	0.0,	-0.5,	0.0, 
-	0.0,	1.0,	0.0,	0.0, 
-	0.5,	0.0,	.866,	0.0, 
-	0.0,	0.0,	0.0,	1.0 
-}; 
+
+	GzMatrix	cameraTranslation =
+	{
+		1,	0,	0,	-2,
+		0,	1,	0,	-2,
+		0,	0,	1,	-2,
+		0,	0,	0,	1
+	};
 
 #if 1 	/* set up app-defined camera if desired, else use camera defaults */
     //camera.position[X] = -3;
@@ -124,21 +140,21 @@ GzMatrix	rotateY =
     camera.position[Y] = 0;
     camera.position[Z] = 0;
 
-    //camera.lookat[X] = 7.8;
-    //camera.lookat[Y] = 0.7;
-    //camera.lookat[Z] = 6.5;
+    camera.lookat[X] = 0;
+    camera.lookat[Y] = 0;
+    camera.lookat[Z] = 0;
 
-	camera.lookat[X] = 7.8;
-	camera.lookat[Y] = 0.7;
-	camera.lookat[Z] = 6.5;
+	//camera.lookat[X] = 0;
+	//camera.lookat[Y] = 0;
+	//camera.lookat[Z] = 0;
 
-    camera.worldup[X] = -0.2;
+    camera.worldup[X] = 0;
     camera.worldup[Y] = 1.0;
     camera.worldup[Z] = 0.0;
 
-    camera.FOV = 63.7;              /* degrees *              /* degrees */
+    camera.FOV = 90;              /* degrees *              /* degrees */
 
-	status |= m_pRender->GzPutCamera(camera); 
+	status |= m_pRender->GzPutCamera(camera, cameraTranslation); 
 #endif 
 
 	/* Start Renderer */
@@ -206,12 +222,12 @@ GzMatrix	rotateY =
         status |= m_pRender->GzPutAttribute(6, nameListShader, valueListShader);
 
 	//Vert stack
-	status |= m_pRender->GzPushMatrix(scale, m_pRender->Ximage, m_pRender->matlevel, false);  
-	status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Ximage, m_pRender->matlevel, false);
+	//status |= m_pRender->GzPushMatrix(scale, m_pRender->Ximage, m_pRender->matlevel, false);  
+	//status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Ximage, m_pRender->matlevel, false);
 	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Ximage, m_pRender->matlevel, false);
 
 	//Normal Stack
-	status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Xnorm, m_pRender->normMatLevel, true);
+	//status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Xnorm, m_pRender->normMatLevel, true);
 	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Xnorm, m_pRender->normMatLevel, true);
 
 	if (status) exit(GZ_FAILURE); 

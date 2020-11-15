@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "Ray.h"
 
-void Ray::Normalize(Point &input)
+void Ray::Normalize(Point input)
 {
 	float modR = sqrt((input.x * input.x) + (input.y* input.y) + (input.z * input.z));
 	input.x = input.x / modR;

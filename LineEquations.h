@@ -8,7 +8,7 @@ public:
 	GzCoord coord;
 
 	//Order vertices
-	static void OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList);
+	static void OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]);
 
 	//Gets line coefficients based on vert points. verts are size 2 arrays, returnArray size 3
 	static void GetLineCoefficients(float* tailVert, float* headVert, float* returnArray);

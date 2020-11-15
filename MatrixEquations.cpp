@@ -81,6 +81,19 @@ void MatrixEquations::MatrixVectorMult(GzMatrix mat, GzCoord coord) {
 
 }
 
+void MatrixEquations::MatrixVectorMult(GzMatrix mat, Point &p) {
+	float tempArray[4];
+
+	for (int i = 0; i < 4; i++) {
+		//Fourth term W is set to 1
+		tempArray[i] = (mat[i][0] * p.x) + (mat[i][1] * p.y) + (mat[i][2] * p.z) + (mat[i][3]);
+	}
+
+	p.x = tempArray[X] / tempArray[3];
+	p.y = tempArray[Y] / tempArray[3];
+	p.z = tempArray[Z] / tempArray[3];
+}
+
 //Assumes size 3 vector
  void MatrixEquations::CrossProduct(float* vecOne, float* vecTwo, float* returnVal) {
 	returnVal[0] = vecOne[1] * vecTwo[2] - vecOne[2] * vecTwo[1];

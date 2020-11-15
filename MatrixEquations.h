@@ -1,5 +1,6 @@
 #pragma once
 #include "gz.h"
+#include "Ray.h"
 
 
 class MatrixEquations
@@ -24,6 +25,9 @@ public:
 	
 	//Return is in GzCoord
 	static void MatrixVectorMult(GzMatrix, GzCoord);
+
+	//I don't want to talk about it
+	static void MatrixVectorMult(GzMatrix, Point &p);
 
 	//Calculates the cross product
 	static void CrossProduct(float* vecOne, float* vecTwo, float* returnVal);

@@ -65,7 +65,7 @@ public:
 	int GzPutAttribute(int numAttributes, GzToken *nameList, GzPointer *valueList);
 
 	// HW3
-	int GzPutCamera(GzCamera camera);
+	int GzPutCamera(GzCamera camera, GzMatrix translation);
 	int GzPushMatrix(GzMatrix	matrix, GzMatrix* target, short &counter, bool normalizeMatrix);
 	int GzPopMatrix(int counter);
 	int GzDefaultCamera();
@@ -100,7 +100,7 @@ public:
 	int ConvertTri(GzToken* nameList, GzPointer* valueList); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 
 	// help function for Camera
-	//Ray getRay(GzCoord px, GzCamera cam);
+	Ray getRay(GzCoord px, GzCamera cam);
 	int CameraUpdate(GzCamera cam);
 };
 #endif

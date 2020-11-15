@@ -64,6 +64,7 @@ typedef struct  GzCamera
   GzCoord			position;  /* position of image plane origin */
   GzCoord			lookat;         /* position of look-at-point */
   GzCoord			worldup;   /* world up-vector (almost screen up) */
+  GzMatrix			CameraTranslation;
 
   GzCoord           lowerLeftCorner; /*position of the lower left corner of the near plane of the viewing cone*/
   GzCoord           horizontal; // horizontal span of the near plane in the camera coordinate system
