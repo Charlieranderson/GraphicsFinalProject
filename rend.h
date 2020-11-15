@@ -106,7 +106,7 @@ public:
 	int ConvertTri(GzToken* nameList, GzPointer* valueList); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 	
 	// help function for Camera
-	Ray getRay(GzCoord px, GzCamera cam);
+	Ray getRay(GzCoord px, GzCoord cam);
 	int CameraUpdate(GzCamera cam);
 
 	void sort();

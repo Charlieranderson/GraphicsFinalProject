@@ -1404,14 +1404,13 @@ int GzRender::RenderImg() {
 			GzCoord worldSpacePixel;
 			ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
 
-			//CameraUpdate(m_camera);
+			float origin[3] = { m_camera.position[0], m_camera.position[1], m_camera.position[2] };
+			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, worldSpacePixel);
+			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, origin);
 
-			//TODO: Create ray with m_camera position, worldspacePixel position
-			//CameraUpdate(m_camera);
-			Ray ray = getRay(worldSpacePixel, m_camera);
+			Ray ray = getRay(worldSpacePixel, origin);
 
-			//MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, ray.direction);
-			//MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, ray.origin);
+			
 
 			GzColor color = { 0,0,0 };
 			CalculateColorRaytrace(ray, 1, color);
@@ -1454,16 +1453,16 @@ int GzRender::CameraUpdate(GzCamera cam)
 	return GZ_SUCCESS;
 }
 
-Ray GzRender::getRay(GzCoord worldSpacePixel, GzCamera cam)
+Ray GzRender::getRay(GzCoord worldSpacePixel, GzCoord origin)
 {
 	Point Pos, Dir;
-	Pos.x = cam.position[0];
-	Pos.y = cam.position[1];
-	Pos.z = cam.position[2];
+	Pos.x = origin[0];
+	Pos.y = origin[1];
+	Pos.z = origin[2];
 
-	Dir.x = worldSpacePixel[X] - cam.position[X];
-	Dir.y = worldSpacePixel[Y] - cam.position[Y];
-	Dir.z = worldSpacePixel[Z] - cam.position[Z];
+	Dir.x = worldSpacePixel[X] - origin[X];
+	Dir.y = worldSpacePixel[Y] - origin[Y];
+	Dir.z = worldSpacePixel[Z] - origin[Z];
 
 
 	return Ray(Pos, Dir);
