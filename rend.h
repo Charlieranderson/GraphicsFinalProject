@@ -46,6 +46,12 @@ public:
 	float		    spec;		/* specular power */
 	GzTexture		tex_fun;    /* tex_fun(float u, float v, GzColor color) */
 
+	GzCoord vert1, vert2, vert3, v1, v2, v3;
+	GzCoord norm1, norm2, norm3, n1, n2, n3;
+	GzCoord intersection, minIntersectPoint;
+	GzCoord edge1, edge2, edge3,C0,C1,C2;
+	float t;
+	GzPlane plane;
   	// Constructors
 	GzRender(int xRes, int yRes);
 	~GzRender();
@@ -98,9 +104,12 @@ public:
 	int Raycast(); /*Raycasts. Change return to the correct intersection*/
 	void ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel); /* Converts screenspace pixel to worldspace */
 	int ConvertTri(GzToken* nameList, GzPointer* valueList); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
-
+	
 	// help function for Camera
 	Ray getRay(GzCoord px, GzCamera cam);
 	int CameraUpdate(GzCamera cam);
+
+	void sort();
+	float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2);
 };
 #endif

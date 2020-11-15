@@ -1068,6 +1068,10 @@ float dotProduct(Point a, Point b)
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
+float DProduct(GzCoord a, GzCoord b)
+{
+	return (a[X] * b[X]) + (a[Y] * b[Y]) + (a[Z] * b[Z]);
+}
 
 bool crossProduct(const GzCoord v1, const GzCoord v2, GzCoord result)
 {
@@ -1084,7 +1088,12 @@ bool crossProduct(const GzCoord v1, const GzCoord v2, GzCoord result)
 
 	return true;
 }
-
+void cp(GzCoord v1, GzCoord v2, GzCoord result)
+{
+	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
+	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
+	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
+}
 float vecMagnitude(GzCoord v)
 {
 	return sqrt(pow(v[X], 2) + pow(v[Y], 2) + pow(v[Z], 2));
@@ -1095,15 +1104,13 @@ bool within01Range(float v)
 	return (0 <= v && v <= 1);
 }
 
-float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersectingPoint)
+float GzRender::FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2)
 {
 
 	float planeCoefficients[4];
 	LineEquations::GetPlaneCoefficients(vert0, vert1, vert2, planeCoefficients);
 
 	Point planeNormal = { planeCoefficients[0], planeCoefficients[1], planeCoefficients[2] };
-
-	GzPlane plane;
 	plane.normal = planeNormal;
 	plane.d = planeCoefficients[3];
 
@@ -1120,15 +1127,115 @@ float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzC
 		return INT_MAX;
 
 	// find t = -(a*x1 + b*y1 + c*z1 + d) / (a*Vx + b*Vy + c*Vz)
-	float t = -(dot2 + d) / dot1;
+    t = -(dot2 + d) / dot1;
 
 	// find intersection point
-	intersectingPoint[X] = ray.origin.x + (t * ray.direction.x);
-	intersectingPoint[Y] = ray.origin.y + (t * ray.direction.y);
-	intersectingPoint[Z] = ray.origin.z + (t * ray.direction.z);
+	intersection[X] = ray.origin.x + (t * ray.direction.x);
+	intersection[Y] = ray.origin.y + (t * ray.direction.y);
+	intersection[Z] = ray.origin.z + (t * ray.direction.z);
 
-	return t;
+	return GZ_SUCCESS;
 }
+void GzRender::sort()
+{
+	if (vert1[Y] < vert2[Y])
+	{
+		if (vert1[Y] < vert3[Y])
+		{
+			memcpy(&v1, &vert1, sizeof(GzCoord));
+			memcpy(&n1, &norm1, sizeof(GzCoord));
+			
+			if (vert2[Y] < vert3[Y])
+			{
+				memcpy(&v2, &vert2, sizeof(GzCoord));
+				memcpy(&n2, &norm2, sizeof(GzCoord));
+				
+
+				memcpy(&v3, &vert3, sizeof(GzCoord));
+				memcpy(&n3, &norm3, sizeof(GzCoord));
+				
+
+			}
+			else
+			{
+				memcpy(&v2, &vert3, sizeof(GzCoord));
+				memcpy(&n2, &norm3, sizeof(GzCoord));
+				
+
+				memcpy(&v3, &vert2, sizeof(GzCoord));
+				memcpy(&n3, &norm2, sizeof(GzCoord));
+				
+
+			}
+
+		}
+		else if (vert1[Y] > vert3[Y])
+		{
+			memcpy(&v1, &vert3, sizeof(GzCoord));
+			memcpy(&n1, &norm3, sizeof(GzCoord));
+			
+
+			memcpy(&v2, &vert1, sizeof(GzCoord));
+			memcpy(&n2, &norm1, sizeof(GzCoord));
+			
+			memcpy(&v3, &vert2, sizeof(GzCoord));
+			memcpy(&n3, &norm2, sizeof(GzCoord));
+			
+
+		}
+
+	}
+	else
+	{
+		if (vert2[Y] < vert3[Y])
+		{
+			memcpy(&v1, &vert2, sizeof(GzCoord));
+			memcpy(&n1, &norm2, sizeof(GzCoord));
+		
+
+			if (vert1[Y] < vert3[Y])
+			{
+				memcpy(&v2, &vert1, sizeof(GzCoord));
+				memcpy(&n2, &norm1, sizeof(GzCoord));
+				
+
+				memcpy(&v3, &vert3, sizeof(GzCoord));
+				memcpy(&n3, &norm3, sizeof(GzCoord));
+				
+
+			}
+			else
+			{
+				memcpy(&v2, &vert3, sizeof(GzCoord));
+				memcpy(&n2, &norm3, sizeof(GzCoord));
+			
+
+				memcpy(&v3, &vert1, sizeof(GzCoord));
+				memcpy(&n3, &norm1, sizeof(GzCoord));
+			
+
+			}
+
+		}
+		else if (vert2[Y] > vert3[Y])
+		{
+			memcpy(&v1, &vert3, sizeof(GzCoord));
+			memcpy(&n1, &norm3, sizeof(GzCoord));
+			
+
+			memcpy(&v2, &vert2, sizeof(GzCoord));
+			memcpy(&n2, &norm2, sizeof(GzCoord));
+		
+			memcpy(&v3, &vert1, sizeof(GzCoord));
+			memcpy(&n3, &norm1, sizeof(GzCoord));
+
+
+		}
+
+	}
+
+}
+
 
 void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
 	//Recursively search for rays and reflection/refraction ray
@@ -1144,7 +1251,7 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	//Kt[BLUE] = 0.1;
 	GzColor intensity;
 	//Something = FindIntersecion
-	GzCoord intersection, minIntersectPoint;
+	
 	float smallestTValue = INT_MAX;
 	//need a loop to iterate through all world space triangles
 	//Check intersections
@@ -1152,58 +1259,76 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	for (int k = 0; k < tribuffer.size(); k++)
 	{
 		GzTridata singleTriangle = tribuffer[k];
-		GzCoord pointA, pointB, pointC, vecAB, vecAC, vecPA, vecPB, vecPC, ABcrossAC, PBcrossPC, PCcrossPA;
-		memcpy(pointA, singleTriangle.vertOne, sizeof(GzCoord));
-		memcpy(pointB, singleTriangle.vertTwo, sizeof(GzCoord));
-		memcpy(pointC, singleTriangle.vertThree, sizeof(GzCoord));
+		GzCoord  vecAB, vecAC, vecPA, vecPB, vecPC, ABcrossAC, PBcrossPC, PCcrossPA;
+		memcpy(vert1, singleTriangle.vertOne, sizeof(GzCoord));
+		memcpy(vert2, singleTriangle.vertTwo, sizeof(GzCoord));
+		memcpy(vert3, singleTriangle.vertThree, sizeof(GzCoord));
+		memcpy(norm1, singleTriangle.normOne, sizeof(GzCoord));
+		memcpy(norm2, singleTriangle.normTwo, sizeof(GzCoord));
+		memcpy(norm3, singleTriangle.normThree, sizeof(GzCoord));
 
-		float t = FindIntersection(ray, pointA, pointB, pointC, intersection);
+		FindIntersection(ray, vert1, vert2, vert3);
 
 		// Ray does not intersect
 		if (t == INT_MAX || t < 0)
 			continue;
 
+		sort();
+		
+		edge1[X] = v2[X] - v1[X];
+		edge1[Y] = v2[Y] - v1[Y];
+		edge1[Z] = v2[Z] - v1[Z];
 
-		//LR evaluation here.
-		//Line data:
+		edge2[X] = v3[X] - v2[X];
+		edge2[Y] = v3[Y] - v2[Y];
+		edge2[Z] = v3[Z] - v2[Z];
 
-		GzCoord vertOrder[3];
-		GzCoord normalOrder[3];
-		memcpy(vertOrder[0], pointA, sizeof(GzCoord));
-		memcpy(vertOrder[1], pointB, sizeof(GzCoord));
-		memcpy(vertOrder[2], pointC, sizeof(GzCoord));
+		edge3[X] = v1[X] - v3[X];
+		edge3[Y] = v1[Y] - v3[Y];
+		edge3[Z] = v1[Z] - v3[Z];
 
-		memcpy(normalOrder[0], singleTriangle.normOne, sizeof(GzCoord));
-		memcpy(normalOrder[1], singleTriangle.normTwo, sizeof(GzCoord));
-		memcpy(normalOrder[2], singleTriangle.normThree, sizeof(GzCoord));
+		C0[X] = intersection[X] - v1[X];
+		C0[Y] = intersection[Y] - v1[Y];
+		C0[Z] = intersection[Z] - v1[Z];
 
-		LineEquations::OrderVerts(vertOrder, normalOrder);
+		C1[X] = intersection[X] - v2[X];
+		C1[Y] = intersection[Y] - v2[Y];
+		C1[Z] = intersection[Z] - v2[Z];
 
-		float coefficients[3];
-		float coefficientsTwo[3];
-		float coefficientsThree[3];
-		LineEquations::GetLineCoefficients(vertOrder[0], vertOrder[1], coefficients);
-		LineEquations::GetLineCoefficients(vertOrder[1], vertOrder[2], coefficientsTwo);
-		LineEquations::GetLineCoefficients(vertOrder[2], vertOrder[0], coefficientsThree);
-
-
-		if (LineEquations::EvaluatePointByLine(coefficients, intersection[0], intersection[1])
-			&& LineEquations::EvaluatePointByLine(coefficientsTwo, intersection[0], intersection[1])
-			&& LineEquations::EvaluatePointByLine(coefficientsThree, intersection[0], intersection[1])) {
-			if (t <= smallestTValue)
+		C2[X] = intersection[X] - v3[X];
+		C2[Y] = intersection[Y] - v3[Y];
+		C2[Z] = intersection[Z] - v3[Z];
+        
+		GzCoord temp1,temp2, temp3;
+		crossProduct(edge1, C0, temp1);
+		crossProduct(edge2, C1, temp2);
+		crossProduct(edge3, C2, temp3);
+		GzCoord Pnormal;
+		Pnormal[X] = plane.normal.x;
+		Pnormal[Y] = plane.normal.y;
+		Pnormal[Z] = plane.normal.z;
+		if (DProduct(Pnormal, temp1) > 0) 
+		{
+			if (DProduct(Pnormal, temp2) > 0) 
 			{
-				smallestTValue = t;
-				memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
-				memcpy(normA, singleTriangle.normOne, sizeof(GzCoord));
-				memcpy(normB, singleTriangle.normTwo, sizeof(GzCoord));
-				memcpy(normC, singleTriangle.normThree, sizeof(GzCoord));
-				memcpy(pA, singleTriangle.vertOne, sizeof(GzCoord));
-				memcpy(pB, singleTriangle.vertTwo, sizeof(GzCoord));
-				memcpy(pC, singleTriangle.vertThree, sizeof(GzCoord));
+				if (DProduct(Pnormal, temp3) > 0) 
+				{
+					if (t <= smallestTValue)
+					{
+						smallestTValue = t;
+						memcpy(minIntersectPoint, intersection, sizeof(GzCoord));
+						memcpy(normA, v1, sizeof(GzCoord));
+						memcpy(normB, v2, sizeof(GzCoord));
+						memcpy(normC, v3, sizeof(GzCoord));
+						memcpy(pA, n1, sizeof(GzCoord));
+						memcpy(pB, n2, sizeof(GzCoord));
+						memcpy(pC, n3, sizeof(GzCoord));
+
+					}
+				}
 			}
 		}
-
-
+	
 	}
 	
 	//float xValueCoefficients[4];
@@ -1213,44 +1338,10 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	//supposseed to interpolate but will just be flat for now
 		GzCoord normal = { 0,0,0 };
 		memcpy(normal, normA, sizeof(GzCoord));
-		if (smallestTValue < INT_MAX) {
+		if (smallestTValue < INT_MAX) 
+		{
 			CalculatePhongColor(normal, intensity, Kd, Ka);
-			/*if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
-			{
-				GetReflection(&ray, normal, intersection, &reflec);
-
-				if (depth <= 5) {
-					CalculateColorRaytrace(reflec, depth + 1, spec);
-					for (int i = 0; i < 3; ++i) {
-						spec[i] *= Kr[i] / depth;
-					}
-				}
-				else {
-					for (int i = 0; i < 3; ++i) {
-						spec[i] *= 0;
-					}
-				}
-			}
-
-			if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
-			{
-				GetRefraction(&ray, normal, intersection, &refrac);
-
-				if (depth <= 5) {
-					CalculateColorRaytrace(refrac, depth + 1, diff);
-					for (int i = 0; i < 3; ++i) {
-						diff[i] *= Kt[i] / depth;
-					}
-				}
-				else {
-					for (int i = 0; i < 3; ++i) {
-						diff[i] *= 0;
-					}
-				}
-			}*/
-			/*	for (int i = 0; i < 3; ++i) {
-					intensity[i] = spec[i] + diff[i] + intensity[i];
-				}*/
+			
 		}
 		else {
 
