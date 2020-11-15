@@ -112,4 +112,9 @@ float LineEquations::InterpolateZ(float* coefficients, int x, int y) {
 	//return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
 }
 
+float LineEquations::InterpolateZFloat(float* coefficients, float x, float y) {
+	float returnVal = (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
+	return returnVal;
+	//return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
+}
 

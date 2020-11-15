@@ -1338,62 +1338,64 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	//float zValueCoefficients[4];
 	//GetNormalCoefficients(vertPtr, normals, xValueCoefficients, yValueCoefficients, zValueCoefficients);
 	//supposseed to interpolate but will just be flat for now
-		float xValueCoefficients[4];
-		float yValueCoefficients[4];
-		float zValueCoefficients[4];
-		GetNormalCoefficients(pA, pB, pC, normA, normB, normC, xValueCoefficients, yValueCoefficients, zValueCoefficients);
-		float normal[3] = { LineEquations::InterpolateZ(xValueCoefficients, intersection[X], intersection[Y]),
-								LineEquations::InterpolateZ(yValueCoefficients, intersection[X], intersection[Y]),
-								LineEquations::InterpolateZ(zValueCoefficients, intersection[X], intersection[Y]), };
-		if (smallestTValue < INT_MAX) 
+	float xValueCoefficients[4];
+	float yValueCoefficients[4];
+	float zValueCoefficients[4];
+
+	GetNormalCoefficients(pA, pB, pC, normA, normB, normC, xValueCoefficients, yValueCoefficients, zValueCoefficients);
+
+	float normal[3] = { LineEquations::InterpolateZFloat(xValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
+							LineEquations::InterpolateZFloat(yValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
+							LineEquations::InterpolateZFloat(zValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]), };
+
+	if (smallestTValue < INT_MAX) 
+	{
+		CalculatePhongColor(normal, intensity, Kd, Ka);
+		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
 		{
-			CalculatePhongColor(normal, intensity, Kd, Ka);
-			if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
-			{
-				GetReflection(&ray, normal, intersection, &reflec);
+			GetReflection(&ray, normal, intersection, &reflec);
 
-				if (depth <= 5) {
-					CalculateColorRaytrace(reflec, depth + 1, spec);
-					for (int i = 0; i < 3; ++i) {
-						spec[i] *= Kr[i] / depth;
-					}
-				}
-				else {
-					for (int i = 0; i < 3; ++i) {
-						spec[i] *= 0;
-					}
+			if (depth <= 5) {
+				CalculateColorRaytrace(reflec, depth + 1, spec);
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= Kr[i] / depth;
 				}
 			}
-
-			if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
-			{
-				GetRefraction(&ray, normal, intersection, &refrac);
-
-				if (depth <= 5) {
-					CalculateColorRaytrace(refrac, depth + 1, diff);
-					for (int i = 0; i < 3; ++i) {
-						diff[i] *= Kt[i] / depth;
-					}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					spec[i] *= 0;
 				}
-				else {
-					for (int i = 0; i < 3; ++i) {
-						diff[i] *= 0;
-					}
-				}
-			}
-			for (int i = 0; i < 3; ++i) {
-				intensity[i] = spec[i] + diff[i] + intensity[i];
 			}
 		}
-		else {
 
-			intensity[0] = 0;
-			intensity[1] = .5;
-			intensity[2] = .5;
+		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
+		{
+			GetRefraction(&ray, normal, intersection, &refrac);
+
+			if (depth <= 5) {
+				CalculateColorRaytrace(refrac, depth + 1, diff);
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= Kt[i] / depth;
+				}
+			}
+			else {
+				for (int i = 0; i < 3; ++i) {
+					diff[i] *= 0;
+				}
+			}
 		}
-		memcpy(returnColor, intensity, sizeof(GzColor));
+		for (int i = 0; i < 3; ++i) {
+			intensity[i] = spec[i] + diff[i] + intensity[i];
+		}
+	}
+	else {
 
-	
+		intensity[0] = 0;
+		intensity[1] = .5;
+		intensity[2] = .5;
+	}
+	memcpy(returnColor, intensity, sizeof(GzColor));
+
 }
 
 void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)

@@ -168,7 +168,8 @@ int Application5::Initialize()
 
 	/* Material property */
 	GzColor specularCoefficient = { 0.3, 0.3, 0.3 };
-	GzColor ambientCoefficient = { 0.1, 0.1, 0.1 };
+	//GzColor ambientCoefficient = { 0.1, 0.1, 0.1 };
+	GzColor ambientCoefficient = { 0, 0, 0 };
 	GzColor diffuseCoefficient = {0.7, 0.7, 0.7};
 
 /* 
@@ -179,16 +180,16 @@ int Application5::Initialize()
          * Tokens associated with light parameters
          */
         nameListLights[0] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[0] = (GzPointer)&light1;
+        valueListLights[0] = (GzPointer)&light3;
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
-        nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[2] = (GzPointer)&light3; 
+        //nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
+        //valueListLights[2] = (GzPointer)&light3;
 
 
         nameListLights[0] = GZ_AMBIENT_LIGHT;
         valueListLights[0] = (GzPointer)&ambientlight;
-        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
+        status |= m_pRender->GzPutAttribute(2, nameListLights, valueListLights);
 
         /*
          * Tokens associated with shading 
