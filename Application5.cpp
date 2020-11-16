@@ -280,7 +280,7 @@ int Application5::Render()
 	* Walk through the list of triangles, set color 
 	* and render each triangle 
 	*/ 
-
+#if 1
 	while (fscanf(infile, "%s", dummy) == 1) { 	/* read in tri word */
 		fscanf(infile, "%f %f %f %f %f %f %f %f",
 			&(vertexList[0][0]), &(vertexList[0][1]),
@@ -318,148 +318,148 @@ int Application5::Render()
 	}
 
 	////read the obj file
+# else
+	std::ifstream file("benchObjModel.txt");
+	std::string str;
 
-	//std::ifstream file("benchObjModel.txt");
-	//std::string str;
+	std::vector<vertex> verticesList;
+	std::vector<uv> uvsList;
+	std::vector<normal> normalsList;
+	std::vector<triangle> triangles;
 
-	//std::vector<vertex> verticesList;
-	//std::vector<uv> uvsList;
-	//std::vector<normal> normalsList;
-	//std::vector<triangle> triangles;
+	while (getline(file, str))
+	{
+		std::istringstream in(str);
+		std::string type;
+		in >> type;
+		if (type == "v") {
+			float x, y, z;
+			in >> x >> y >> z;
+			verticesList.push_back({ x,y,z });
 
-	//while (getline(file, str))
-	//{
-	//	std::istringstream in(str);
-	//	std::string type;
-	//	in >> type;
-	//	if (type == "v") {
-	//		float x, y, z;
-	//		in >> x >> y >> z;
-	//		verticesList.push_back({ x,y,z });
+		}
+		else if (type == "vt") {
+			float x, y;
+			in >> x >> y;
+			uvsList.push_back({ x,y });
+		}
 
-	//	}
-	//	else if (type == "vt") {
-	//		float x, y;
-	//		in >> x >> y;
-	//		uvsList.push_back({ x,y });
-	//	}
+		else if (type == "vn") {
+			float x, y, z;
+			in >> x >> y >> z;
+			normalsList.push_back({ x,y,z });
+		}
+		else if (type == "f") {
+			std::string x, y, z,e;
+			in >> x >> y >> z >> e;
+			if (e!="") {
+				triangles.push_back({ x,y,z });
+				triangles.push_back({ y,z,e });
+				triangles.push_back({ z,e,x });
+				triangles.push_back({ e,x,y });
+			}
+          else {
+				triangles.push_back({ x,y,z });
+			}
+		}
 
-	//	else if (type == "vn") {
-	//		float x, y, z;
-	//		in >> x >> y >> z;
-	//		normalsList.push_back({ x,y,z });
-	//	}
-	//	else if (type == "f") {
-	//		std::string x, y, z;
-	//		in >> x >> y >> z >> e;
-	//		if (e!="") {
-			//	triangles.push_back({ x,y,z });
-			//	triangles.push_back({ y,z,e });
-			//	triangles.push_back({ z,e,x });
-			//	triangles.push_back({ e,x,y });
-			//}
-    //      else {
-			//	triangles.push_back({ x,y,z });
-			//}
-	//	}
+	}
 
-	//}
+	//process read data and store these values in the variables that the HW uses
 
-	////process read data and store these values in the variables that the HW uses
+	//------------NOTE-------------------
 
-	////------------NOTE-------------------
+	// vertexList (used by HW) | verticesList (defined by us to read the values)
+	// uvList (used by HW) | uvsList (defined by us to read the values)
+	// normalList (used by HW) | normalsList (defined by us to read the values)
 
-	//// vertexList (used by HW) | verticesList (defined by us to read the values)
-	//// uvList (used by HW) | uvsList (defined by us to read the values)
-	//// normalList (used by HW) | normalsList (defined by us to read the values)
+	int n = triangles.size();
+	for (int i = 0; i < n; i++) {
+		std::stringstream ss1(triangles[i].x);
+		std::string token1;
+		int ind = 0;
+		while (getline(ss1, token1, '/')) {
+			int x = 0;
+			std::stringstream num(token1);
+			num >> x;
+			if (ind == 0) {
+				vertexList[0][0] = verticesList[x - 1].x;
+				vertexList[0][1] = verticesList[x - 1].y;
+				vertexList[0][2] = verticesList[x - 1].z;
+			}
+			else if (ind == 1) {
+				uvList[0][0] = uvsList[x - 1].x;
+				uvList[0][1] = uvsList[x - 1].y;
+			}
+			else {
+				normalList[0][0] = normalsList[x - 1].x;
+				normalList[0][1] = normalsList[x - 1].y;
+				normalList[0][2] = normalsList[x - 1].z;
+			}
+			ind++;
 
-	//int n = verticesList.size();
-	//for (int i = 0; i < n; i++) {
-	//	std::stringstream ss1(triangles[i].x);
-	//	std::string token1;
-	//	int ind = 0;
-	//	while (getline(ss1, token1, '/')) {
-	//		int x = 0;
-	//		std::stringstream num(token1);
-	//		num >> x;
-	//		if (ind == 0) {
-	//			vertexList[0][0] = verticesList[x - 1].x;
-	//			vertexList[0][1] = verticesList[x - 1].y;
-	//			vertexList[0][2] = verticesList[x - 1].z;
-	//		}
-	//		else if (ind == 1) {
-	//			uvList[0][0] = uvsList[x - 1].x;
-	//			uvList[0][1] = uvsList[x - 1].y;
-	//		}
-	//		else {
-	//			normalList[0][0] = normalsList[x - 1].x;
-	//			normalList[0][1] = normalsList[x - 1].y;
-	//			normalList[0][2] = normalsList[x - 1].z;
-	//		}
-	//		ind++;
+		}
 
-	//	}
-
-	//	ind = 0;
-	//	std::stringstream ss2(triangles[i].y);
-	//	std::string token2;
-	//	while (getline(ss2, token2, '/')) {
-	//		int x = 0;
-	//		std::stringstream num(token2);
-	//		num >> x;
-	//		if (ind == 0) {
-	//			vertexList[0][0] = verticesList[x - 1].x;
-	//			vertexList[0][1] = verticesList[x - 1].y;
-	//			vertexList[0][2] = verticesList[x - 1].z;
-	//		}
-	//		else if (ind == 1) {
-	//			uvList[0][0] = uvsList[x - 1].x;
-	//			uvList[0][1] = uvsList[x - 1].y;
-	//		}
-	//		else {
-	//			normalList[0][0] = normalsList[x - 1].x;
-	//			normalList[0][1] = normalsList[x - 1].y;
-	//			normalList[0][2] = normalsList[x - 1].z;
-	//		}
-	//		ind++;
-	//	}
-	//	ind = 0;
-	//	std::stringstream ss3(triangles[i].z);
-	//	std::string token3;
-	//	while (getline(ss3, token3, '/')) {
-	//		int x = 0;
-	//		std::stringstream num(token3);
-	//		num >> x;
-	//		if (ind == 0) {
-	//			vertexList[0][0] = verticesList[x - 1].x;
-	//			vertexList[0][1] = verticesList[x - 1].y;
-	//			vertexList[0][2] = verticesList[x - 1].z;
-	//		}
-	//		else if (ind == 1) {
-	//			uvList[0][0] = uvsList[x - 1].x;
-	//			uvList[0][1] = uvsList[x - 1].y;
-	//		}
-	//		else {
-	//			normalList[0][0] = normalsList[x - 1].x;
-	//			normalList[0][1] = normalsList[x - 1].y;
-	//			normalList[0][2] = normalsList[x - 1].z;
-	//		}
-	//		ind++;
-	//	}
-	//     valueListTriangle[0] = (GzPointer)vertexList; 
-	//	 valueListTriangle[1] = (GzPointer)normalList; 
-	//	 valueListTriangle[2] = (GzPointer)uvList; 
+		ind = 0;
+		std::stringstream ss2(triangles[i].y);
+		std::string token2;
+		while (getline(ss2, token2, '/')) {
+			int x = 0;
+			std::stringstream num(token2);
+			num >> x;
+			if (ind == 0) {
+				vertexList[1][0] = verticesList[x - 1].x;
+				vertexList[1][1] = verticesList[x - 1].y;
+				vertexList[1][2] = verticesList[x - 1].z;
+			}
+			else if (ind == 1) {
+				uvList[1][0] = uvsList[x - 1].x;
+				uvList[1][1] = uvsList[x - 1].y;
+			}
+			else {
+				normalList[1][0] = normalsList[x - 1].x;
+				normalList[1][1] = normalsList[x - 1].y;
+				normalList[1][2] = normalsList[x - 1].z;
+			}
+			ind++;
+		}
+		ind = 0;
+		std::stringstream ss3(triangles[i].z);
+		std::string token3;
+		while (getline(ss3, token3, '/')) {
+			int x = 0;
+			std::stringstream num(token3);
+			num >> x;
+			if (ind == 0) {
+				vertexList[2][0] = verticesList[x - 1].x;
+				vertexList[2][1] = verticesList[x - 1].y;
+				vertexList[2][2] = verticesList[x - 1].z;
+			}
+			else if (ind == 1) {
+				uvList[2][0] = uvsList[x - 1].x;
+				uvList[2][1] = uvsList[x - 1].y;
+			}
+			else {
+				normalList[2][0] = normalsList[x - 1].x;
+				normalList[2][1] = normalsList[x - 1].y;
+				normalList[2][2] = normalsList[x - 1].z;
+			}
+			ind++;
+		}
+	     valueListTriangle[0] = (GzPointer)vertexList; 
+		 valueListTriangle[1] = (GzPointer)normalList; 
+		 valueListTriangle[2] = (GzPointer)uvList; 
 
 		 
-		 //m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle);  Old stuff
+		/* m_pRender->GzPutTriangle(3, nameListTriangle, valueListTriangle);  Old stuff
 
-	     //Convert triangles to worldspace
-		 //Store in renderer tribuffer
-		 //Takes 3 sets of verts, 3 sets of normals, ignores UV for now. 
-		 //m_pRender->ConvertTri(Gzcoord, Gzcoord,Gzcoord,Gzcoord,Gzcoord,Gzcoord)
+	     Convert triangles to worldspace
+		 Store in renderer tribuffer
+		 Takes 3 sets of verts, 3 sets of normals, ignores UV for now.*/ 
+		 m_pRender->ConvertTri(nameListTriangle, valueListTriangle);
 
-	//} 
-
+	} 
+#endif
 	//Render img call here
 
 	m_pRender->RenderImg();
