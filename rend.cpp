@@ -1025,6 +1025,16 @@ int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 	}
 
 
+	GzTridata data1;
+	memcpy(data1.vertOne, verts[0], sizeof(GzCoord));
+	memcpy(data1.vertTwo, verts[1], sizeof(GzCoord));
+	memcpy(data1.vertThree, verts[2], sizeof(GzCoord));
+	memcpy(data1.normOne, normals[0], sizeof(GzCoord));
+	memcpy(data1.normTwo, normals[1], sizeof(GzCoord));
+	memcpy(data1.normThree, normals[2], sizeof(GzCoord));
+
+	tribuffer.push_back(data1);
+
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], verts[0]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[1]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[2]);
@@ -1390,9 +1400,10 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	}
 	else {
 
+		//NOTE, THIS IS AFFECTING THE REFLECTION CODE.
 		intensity[0] = 0;
-		intensity[1] = .5;
-		intensity[2] = .5;
+		intensity[1] = 0;
+		intensity[2] = 0;
 	}
 	memcpy(returnColor, intensity, sizeof(GzColor));
 
@@ -1447,8 +1458,6 @@ int GzRender::RenderImg() {
 			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, origin);
 
 			Ray ray = getRay(worldSpacePixel, origin);
-
-			
 
 			GzColor color = { 0,0,0 };
 			CalculateColorRaytrace(ray, 1, color);
