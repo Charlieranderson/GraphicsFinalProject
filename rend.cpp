@@ -1437,10 +1437,47 @@ void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
 	return;
 }
 
-void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
+bool GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
 {
-	refraction = &Ray(ray->PointAt(1), ray->getDirection());
-	return;
+	Point new_origin;
+	Point new_dir;
+	float RdotN;
+	Point normal_;
+	normal_.x = normal[0];
+	normal_.y = normal[1];
+	normal_.z = normal[2];
+	RdotN = dotProduct(normal_, ray->getDirection());
+	RdotN = max(min(RdotN, 1), - 1);
+	float etai = 1, etat = 1.5; //1.5 for glass
+	if (RdotN < 0)
+	{
+		RdotN = -RdotN;
+	}
+	else {
+		float tmp = etai;
+		etai = etat;
+		etat = tmp;
+		normal_.x = -normal[0];
+		normal_.y = -normal[1];
+		normal_.z = -normal[2];
+	}
+	float eta = etai / etat;
+	float k = 1 - eta * eta *(1 - RdotN * RdotN);
+
+	if (k < 0)
+		return 0;
+	else {
+
+		new_dir.x = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[X]);
+		new_dir.y = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[Y]);
+		new_dir.z = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[Z]);
+	}
+	new_origin.x = hitPoint[X] + 1 * new_dir.x;
+	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
+	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
+
+	refraction = &Ray(new_origin, new_dir);
+	return 1;
 }
 int GzRender::RenderImg() {
 

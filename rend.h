@@ -20,7 +20,7 @@
 #define	MAX_LIGHTS	10		/* how many lights allowed */
 
 void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection);
-void GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction);
+bool GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction);
 class GzRender{			/* define a renderer */
   
 
