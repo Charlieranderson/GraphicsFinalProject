@@ -116,11 +116,11 @@ int Application5::Initialize()
 //	0.0,	0.0,	0.0,	1.0 
 //}; 
 
-	GzMatrix	rotateX = 
+	GzMatrix	Xwm = 
 { 
-	1.0,	0.0,	0.0,	0.0, 
-	0.0,	1,	0,	0.0, 
-	0.0,	0,	1,	0.0, 
+	.5,	0.0,	0.0,	-3, 
+	0.0,	0.5,	0.0,	2.0, 
+	0.0,	0.0,	0.5,	0.0, 
 	0.0,	0.0,	0.0,	1.0 
 }; 
 
@@ -133,9 +133,7 @@ int Application5::Initialize()
 	};
 
 #if 1 	/* set up app-defined camera if desired, else use camera defaults */
-    //camera.position[X] = -3;
-    //camera.position[Y] = -25;
-    //camera.position[Z] = -4; 
+
 	camera.position[X] = 0;
     camera.position[Y] = 0;
     camera.position[Z] = 0;
@@ -143,10 +141,6 @@ int Application5::Initialize()
     camera.lookat[X] = 0;
     camera.lookat[Y] = 0;
     camera.lookat[Z] = -1;
-
-	//camera.lookat[X] = 0;
-	//camera.lookat[Y] = 0;
-	//camera.lookat[Z] = 0;
 
     camera.worldup[X] = 0;
     camera.worldup[Y] = 1.0;
@@ -180,16 +174,16 @@ int Application5::Initialize()
          * Tokens associated with light parameters
          */
         nameListLights[0] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[0] = (GzPointer)&light3;
+        valueListLights[0] = (GzPointer)&light1;
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
-        //nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
-        //valueListLights[2] = (GzPointer)&light3;
+        nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
+        valueListLights[2] = (GzPointer)&light3;
 
 
         nameListLights[0] = GZ_AMBIENT_LIGHT;
         valueListLights[0] = (GzPointer)&ambientlight;
-        status |= m_pRender->GzPutAttribute(2, nameListLights, valueListLights);
+        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
 
         /*
          * Tokens associated with shading 
@@ -225,11 +219,11 @@ int Application5::Initialize()
 	//Vert stack
 	//status |= m_pRender->GzPushMatrix(scale, m_pRender->Ximage, m_pRender->matlevel, false);  
 	//status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Ximage, m_pRender->matlevel, false);
-	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Ximage, m_pRender->matlevel, false);
+	status |= m_pRender->GzPushMatrix(Xwm, m_pRender->Ximage, m_pRender->matlevel, false);
 
 	//Normal Stack
 	//status |= m_pRender->GzPushMatrix(rotateY, m_pRender->Xnorm, m_pRender->normMatLevel, true);
-	status |= m_pRender->GzPushMatrix(rotateX, m_pRender->Xnorm, m_pRender->normMatLevel, true);
+	status |= m_pRender->GzPushMatrix(Xwm, m_pRender->Xnorm, m_pRender->normMatLevel, true);
 
 	if (status) exit(GZ_FAILURE); 
 

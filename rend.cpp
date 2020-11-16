@@ -1025,6 +1025,16 @@ int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 	}
 
 
+	GzTridata data1;
+	memcpy(data1.vertOne, verts[0], sizeof(GzCoord));
+	memcpy(data1.vertTwo, verts[1], sizeof(GzCoord));
+	memcpy(data1.vertThree, verts[2], sizeof(GzCoord));
+	memcpy(data1.normOne, normals[0], sizeof(GzCoord));
+	memcpy(data1.normTwo, normals[1], sizeof(GzCoord));
+	memcpy(data1.normThree, normals[2], sizeof(GzCoord));
+
+	tribuffer.push_back(data1);
+
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], verts[0]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[1]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[2]);
@@ -1347,9 +1357,11 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	float normal[3] = { LineEquations::InterpolateZFloat(xValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
 							LineEquations::InterpolateZFloat(yValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
 							LineEquations::InterpolateZFloat(zValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]), };
-
+	//float normal[3] = { 0,1,0 };
 	if (smallestTValue < INT_MAX) 
 	{
+		
+
 		CalculatePhongColor(normal, intensity, Kd, Ka);
 		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
 		{
@@ -1390,7 +1402,8 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	}
 	else {
 
-		intensity[0] = 0;
+		//NOTE, THIS IS AFFECTING THE REFLECTION CODE.
+		intensity[0] = .5;
 		intensity[1] = .5;
 		intensity[2] = .5;
 	}
@@ -1447,8 +1460,6 @@ int GzRender::RenderImg() {
 			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, origin);
 
 			Ray ray = getRay(worldSpacePixel, origin);
-
-			
 
 			GzColor color = { 0,0,0 };
 			CalculateColorRaytrace(ray, 1, color);
