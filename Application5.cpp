@@ -116,13 +116,21 @@ int Application5::Initialize()
 //	0.0,	0.0,	0.0,	1.0 
 //}; 
 
-	GzMatrix	Xwm = 
-{ 
-	.5,	0.0,	0.0,	-3, 
-	0.0,	0.5,	0.0,	2.0, 
-	0.0,	0.0,	0.5,	0.0, 
-	0.0,	0.0,	0.0,	1.0 
-}; 
+//	GzMatrix	Xwm = 
+//{ 
+//	.5,	0.0,	0.0,	-3, 
+//	0.0,	0.5,	0.0,	2.0, 
+//	0.0,	0.0,	0.5,	0.0, 
+//	0.0,	0.0,	0.0,	1.0 
+//}; 
+
+	GzMatrix	Xwm =
+	{
+		1,	0.0,	0.0,	0,
+		0.0,	1,	0.0,	0,
+		0.0,	0.0,	1,	0.0,
+		0.0,	0.0,	0.0,	1.0
+	};
 
 	GzMatrix	cameraTranslation =
 	{
@@ -173,16 +181,15 @@ int Application5::Initialize()
         /*
          * Tokens associated with light parameters
          */
-        nameListLights[0] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[0] = (GzPointer)&light1;
+        //nameListLights[0] = GZ_DIRECTIONAL_LIGHT;
+        //valueListLights[0] = (GzPointer)&light2;
+		nameListLights[0] = GZ_DIRECTIONAL_LIGHT;
+		valueListLights[0] = (GzPointer)&light1;
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
         nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[2] = (GzPointer)&light3;
 
-
-        nameListLights[0] = GZ_AMBIENT_LIGHT;
-        valueListLights[0] = (GzPointer)&ambientlight;
         status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
 
         /*

@@ -123,7 +123,7 @@ typedef	struct {
 #define	MAXYRES	1024
 
 #ifndef GZ_TRIDATA
-typedef struct {
+struct GzTridata {
 	GzCoord		vertOne;
 	GzCoord		vertTwo;
 	GzCoord		vertThree;
@@ -131,6 +131,17 @@ typedef struct {
 	GzCoord		normTwo;
 	GzCoord		normThree;
 
-} GzTridata;
+	GzTridata() {
+		for (int i = 0; i < 3; i++) {
+			vertOne[i] = 0;
+			vertTwo[i] = 0;
+			vertThree[i] = 0;
+			normOne[i] = 0;
+			normTwo[i] = 0;
+			normThree[i] = 0;
+		}
+	}
+
+};
 #define GZ_TRIDATA
 #endif
