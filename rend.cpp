@@ -1357,9 +1357,11 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	float normal[3] = { LineEquations::InterpolateZFloat(xValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
 							LineEquations::InterpolateZFloat(yValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]),
 							LineEquations::InterpolateZFloat(zValueCoefficients, minIntersectPoint[X], minIntersectPoint[Y]), };
-
+	//float normal[3] = { 0,1,0 };
 	if (smallestTValue < INT_MAX) 
 	{
+		
+
 		CalculatePhongColor(normal, intensity, Kd, Ka);
 		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
 		{
@@ -1401,9 +1403,9 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	else {
 
 		//NOTE, THIS IS AFFECTING THE REFLECTION CODE.
-		intensity[0] = 0;
-		intensity[1] = 0;
-		intensity[2] = 0;
+		intensity[0] = .5;
+		intensity[1] = .5;
+		intensity[2] = .5;
 	}
 	memcpy(returnColor, intensity, sizeof(GzColor));
 
