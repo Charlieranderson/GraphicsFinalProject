@@ -1258,7 +1258,7 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 			if (depth <= MAX_DEPTH) {
 				CalculateColorRaytrace(refrac, depth + 1, diff);
 				for (int i = 0; i < 3; ++i) {
-					diff[i] *= Kt[i];
+					diff[i] *= Kt[i] / depth;
 				}
 			}
 			else {

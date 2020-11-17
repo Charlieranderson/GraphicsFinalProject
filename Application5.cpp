@@ -118,9 +118,9 @@ int Application5::Initialize()
 
 //	GzMatrix	Xwm = 
 //{ 
-//	.5,	0.0,	0.0,	-3, 
-//	0.0,	0.5,	0.0,	2.0, 
-//	0.0,	0.0,	0.5,	0.0, 
+//	0.5,	0.0,	0.0,	-4.0, 
+//	0.0,	0.5,	0.0,	1.5, 
+//	0.0,	0.0,	0.5,	.5, 
 //	0.0,	0.0,	0.0,	1.0 
 //}; 
 
@@ -282,7 +282,7 @@ int Application5::Render()
 	* Walk through the list of triangles, set color 
 	* and render each triangle 
 	*/ 
-#if 0
+#if 1
 	while (fscanf(infile, "%s", dummy) == 1) { 	/* read in tri word */
 		fscanf(infile, "%f %f %f %f %f %f %f %f",
 			&(vertexList[0][0]), &(vertexList[0][1]),
