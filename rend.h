@@ -19,10 +19,10 @@
 #define	MATLEVELS	100		/* how many matrix pushes allowed */
 #define	MAX_LIGHTS	10		/* how many lights allowed */
 
-#define MAX_DEPTH	3
+#define MAX_DEPTH	5
 
-void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection);
-bool GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction);
+Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint);
+Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint);
 class GzRender{			/* define a renderer */
   
 
@@ -108,7 +108,6 @@ public:
 
 	// help function for Camera
 	Ray getRay(GzCoord px, GzCoord cam);
-	int CameraUpdate(GzCamera cam);
 
 	float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersection, GzPlane &plane);
 };

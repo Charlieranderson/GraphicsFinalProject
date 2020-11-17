@@ -169,6 +169,7 @@ int Application5::Initialize()
 
 	GzLight	light1 = { {-.4, -0.7, -0.7071}, {0.9, 0.2, 0.3} };
 	GzLight	light2 = { {.4, -0.7, -0.7071}, {0.2, 0.7, 0.3} };
+	GzLight	light3 = { {0, -0.7071, -0.7071}, {0.2, 0.2, 0.7} };
 
 	/* Material property */
 	GzColor specularCoefficient = { 0.3, 0.3, 0.3 };
@@ -188,10 +189,10 @@ int Application5::Initialize()
 		valueListLights[0] = (GzPointer)&light1;
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
-		/*      nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[2] = (GzPointer)&light3;*/
+		nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
+        valueListLights[2] = (GzPointer)&light3;
 
-        status |= m_pRender->GzPutAttribute(1, nameListLights, valueListLights);
+        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
 
         /*
          * Tokens associated with shading 
@@ -281,7 +282,7 @@ int Application5::Render()
 	* Walk through the list of triangles, set color 
 	* and render each triangle 
 	*/ 
-#if 1
+#if 0
 	while (fscanf(infile, "%s", dummy) == 1) { 	/* read in tri word */
 		fscanf(infile, "%f %f %f %f %f %f %f %f",
 			&(vertexList[0][0]), &(vertexList[0][1]),

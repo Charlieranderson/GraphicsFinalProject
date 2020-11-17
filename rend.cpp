@@ -1195,14 +1195,25 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 			//Recursively search for rays and reflection/refraction ray
 		Ray reflec, refrac;
 		GzColor spec, diff;
-		GzColor Kr, Kt;
-		Kr[RED] = 0.5;
-		Kr[GREEN] = 0.5;
-		Kr[BLUE] = 0.5;
+		spec[0] = 0;
+		spec[1] = 0;
+		spec[2] = 0;
 
-		Kt[RED] = 0.1;
-		Kt[GREEN] = 0.1;
-		Kt[BLUE] = 0.1;
+		diff[0] = 0;
+		diff[1] = 0;
+		diff[2] = 0;
+
+		GzColor Kr, Kt;
+		//Kr[RED] = 0.3;
+		//Kr[GREEN] = 0.3;
+		//Kr[BLUE] = 0.3;
+		Kr[RED] = .5;
+		Kr[GREEN] = .5;
+		Kr[BLUE] = .5;
+
+		Kt[RED] = .3;
+		Kt[GREEN] = .3;
+		Kt[BLUE] = .3;
 		
 
 		float xValueCoefficients[4];
@@ -1220,12 +1231,12 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		if (normal[0] == 1 && normal[1] == 1 && normal[2] == 1) {
 			normal[0] = 0;
 			normal[1] = 1;
-			normal[0] = 0;
+			normal[2] = 0;
 		}
 		CalculatePhongColor(minIntersectionPoint, normal, intensity, Kd, Ka);
 		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
 		{
-			GetReflection(&ray, normal, minIntersectionPoint, &reflec);
+			reflec = GetReflection(ray, normal, minIntersectionPoint);
 
 			if (depth <= MAX_DEPTH) {
 				CalculateColorRaytrace(reflec, depth + 1, spec);
@@ -1242,12 +1253,12 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 
 		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
 		{
-			GetRefraction(&ray, normal, minIntersectionPoint, &refrac);
+			refrac = GetRefraction(ray, normal, minIntersectionPoint);
 
 			if (depth <= MAX_DEPTH) {
 				CalculateColorRaytrace(refrac, depth + 1, diff);
 				for (int i = 0; i < 3; ++i) {
-					diff[i] *= Kt[i] / depth;
+					diff[i] *= Kt[i];
 				}
 			}
 			else {
@@ -1271,13 +1282,12 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 			intensity[1] = .3;
 			intensity[2] = .3;
 		}
-		//NOTE, THIS IS AFFECTING THE REFLECTION CODE.
 	}
 	memcpy(returnColor, intensity, sizeof(GzColor));
 
 }
 
-void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
+Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint)
 {
 	Point new_origin;
 	Point new_dir;
@@ -1286,65 +1296,47 @@ void GetReflection(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* reflection)
 	normal_.x = normal[0];
 	normal_.y = normal[1];
 	normal_.z = normal[2];
-	RdotN = dotProduct(normal_, ray->getDirection());
+	RdotN = dotProduct(normal_, ray.direction);
 	if (RdotN > 0) {
 		for (int i = 0; i < 3; ++i)
 			normal[i] *= -1;
 
 	}
-	new_dir.x = ray->getDirection().x - (2 * abs(RdotN)* normal[X]);
-	new_dir.y = ray->getDirection().y - (2 * abs(RdotN)* normal[Y]);
-	new_dir.z = ray->getDirection().z - (2 * abs(RdotN)* normal[Z]);
-	ray->Normalize(new_dir);
-	new_origin.x = hitPoint[X] + 1 * new_dir.x;
-	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
-	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
-	reflection = &Ray(new_origin, new_dir);
-	return;
+	new_dir.x = ray.direction.x - (2 * abs(RdotN)* normal[X]);
+	new_dir.y = ray.direction.y - (2 * abs(RdotN)* normal[Y]);
+	new_dir.z = ray.direction.z - (2 * abs(RdotN)* normal[Z]);
+	ray.Normalize(new_dir);
+	new_origin.x = hitPoint[X];
+	new_origin.y = hitPoint[Y];
+	new_origin.z = hitPoint[Z];
+	return Ray(new_origin, new_dir);
 }
 
-bool GetRefraction(Ray* ray, GzCoord normal, GzCoord hitPoint, Ray* refraction)
+Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint)
 {
-	Point new_origin;
-	Point new_dir;
-	float RdotN;
+	Point new_origin = { 0, 0, 0 };
+	Point new_dir = { 0, 0, 0 };
 	Point normal_;
 	normal_.x = normal[0];
 	normal_.y = normal[1];
 	normal_.z = normal[2];
-	RdotN = dotProduct(normal_, ray->getDirection());
-	RdotN = max(min(RdotN, 1), - 1);
-	float etai = 1, etat = 1.5; //1.5 for glass
-	if (RdotN < 0)
-	{
-		RdotN = -RdotN;
-	}
-	else {
-		float tmp = etai;
-		etai = etat;
-		etat = tmp;
-		normal_.x = -normal[0];
-		normal_.y = -normal[1];
-		normal_.z = -normal[2];
-	}
-	float eta = etai / etat;
-	float k = 1 - eta * eta *(1 - RdotN * RdotN);
 
-	if (k < 0)
-		return 0;
-	else {
+	float eta = .9;
+	float cosi = dotProduct(normal_, ray.direction);
+	//float o = (i * eta - n * (-cosi + eta * cosi));
 
-		new_dir.x = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[X]);
-		new_dir.y = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[Y]);
-		new_dir.z = eta * ray->getDirection().x + (eta * RdotN - sqrtf(k)* normal[Z]);
-	}
-	new_origin.x = hitPoint[X] + 1 * new_dir.x;
-	new_origin.y = hitPoint[Y] + 1 * new_dir.y;
-	new_origin.z = hitPoint[Z] + 1 * new_dir.z;
+	new_dir.x = eta * ray.direction.x - ((-cosi + eta * cosi) * normal_.x);
+	new_dir.y = eta * ray.direction.y - ((-cosi + eta * cosi) * normal_.y);
+	new_dir.z = eta * ray.direction.z - ((-cosi + eta * cosi) * normal_.z);
+	
+	new_origin.x = hitPoint[X];
+	new_origin.y = hitPoint[Y];
+	new_origin.z = hitPoint[Z];
 
-	refraction = &Ray(new_origin, new_dir);
-	return 1;
+	return Ray(new_origin, new_dir);
+	
 }
+
 int GzRender::RenderImg() {
 
 	//for every px
@@ -1374,36 +1366,6 @@ int GzRender::RenderImg() {
 	return GZ_SUCCESS;
 }
 
-//Corners, frustum
-int GzRender::CameraUpdate(GzCamera cam)
-{
-	
-	//// frustum.
-	//float theta = cam.FOV;
-	//float half_height = tan(theta * 0.5f);
-	//float half_width = cam.aspect * half_height;
-
-	//// camera coordinate system.
-	//for (int i = 0; i < 3; i++) 
-	//{
-	//	cam.m_axisZ[i] = cam.position[i] - cam.lookat[i];
-	//}
-	//MatrixEquations::NormalizeVectorThree(cam.m_axisZ);
-	//MatrixEquations::CrossProduct(cam.worldup, cam.m_axisZ, cam.m_axisX);
-	//MatrixEquations::NormalizeVectorThree(cam.m_axisX);
-	//MatrixEquations::CrossProduct(cam.m_axisZ, cam.m_axisX, cam.m_axisY);
-	//MatrixEquations::NormalizeVectorThree(cam.m_axisY);
-
-	//// view port.
-	//for (int i = 0; i < 3; i++)
-	//{
-	//    cam.lowerLeftCorner[i] = cam.position[i] - cam.m_axisX[i] * half_width - cam.m_axisY[i] * half_height - cam.m_axisZ[i];
-	//	cam.horizontal[i] = cam.m_axisX[i] * 2.0f * half_width;
-	//	cam.vertical[i] = cam.m_axisY[i] * 2.0f * half_height;
-	//}
-
-	return GZ_SUCCESS;
-}
 
 Ray GzRender::getRay(GzCoord worldSpacePixel, GzCoord origin)
 {
