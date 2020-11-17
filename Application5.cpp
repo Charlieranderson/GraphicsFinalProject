@@ -163,15 +163,16 @@ int Application5::Initialize()
 	status |= m_pRender->GzBeginRender();
 
 	/* Lights. Should be redefined for world space */
-	GzLight	light1 = { {-0.7071, 0.7071, 0}, {0.5, 0.5, 0.9} };
-	GzLight	light2 = { {0, -0.7071, -0.7071}, {0.9, 0.2, 0.3} };
-	GzLight	light3 = { {0.7071, 0.0, -0.7071}, {0.2, 0.7, 0.3} };
-	GzLight	ambientlight = { {0, 0, 0}, {0.3, 0.3, 0.3} };
+	//GzLight	light1 = { {-0.7071, 0.7071, 0}, {0.5, 0.5, 0.9} };
+	//GzLight	light2 = { {0, -0.7071, -0.7071}, {0.9, 0.2, 0.3} };
+	//GzLight	light3 = { {0.7071, 0.0, -0.7071}, {0.2, 0.7, 0.3} };
+
+	GzLight	light1 = { {-.4, -0.7, -0.7071}, {0.9, 0.2, 0.3} };
+	GzLight	light2 = { {.4, -0.7, -0.7071}, {0.2, 0.7, 0.3} };
 
 	/* Material property */
 	GzColor specularCoefficient = { 0.3, 0.3, 0.3 };
-	//GzColor ambientCoefficient = { 0.1, 0.1, 0.1 };
-	GzColor ambientCoefficient = { 0, 0, 0 };
+	GzColor ambientCoefficient = { 0,0,0 };
 	GzColor diffuseCoefficient = {0.7, 0.7, 0.7};
 
 /* 
@@ -187,10 +188,10 @@ int Application5::Initialize()
 		valueListLights[0] = (GzPointer)&light1;
         nameListLights[1] = GZ_DIRECTIONAL_LIGHT;
         valueListLights[1] = (GzPointer)&light2;
-        nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
-        valueListLights[2] = (GzPointer)&light3;
+		/*      nameListLights[2] = GZ_DIRECTIONAL_LIGHT;
+        valueListLights[2] = (GzPointer)&light3;*/
 
-        status |= m_pRender->GzPutAttribute(3, nameListLights, valueListLights);
+        status |= m_pRender->GzPutAttribute(1, nameListLights, valueListLights);
 
         /*
          * Tokens associated with shading 
