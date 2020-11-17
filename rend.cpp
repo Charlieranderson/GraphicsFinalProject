@@ -1011,17 +1011,6 @@ int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 		}
 	}
 
-
-	//GzTridata data1;
-	//memcpy(data1.vertOne, verts[0], sizeof(GzCoord));
-	//memcpy(data1.vertTwo, verts[1], sizeof(GzCoord));
-	//memcpy(data1.vertThree, verts[2], sizeof(GzCoord));
-	//memcpy(data1.normOne, normals[0], sizeof(GzCoord));
-	//memcpy(data1.normTwo, normals[1], sizeof(GzCoord));
-	//memcpy(data1.normThree, normals[2], sizeof(GzCoord));
-
-	//tribuffer.push_back(data1);
-
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel-1], verts[0]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[1]);
 	MatrixEquations::MatrixVectorMult(Ximage[matlevel - 1], verts[2]);

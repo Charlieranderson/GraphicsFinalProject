@@ -19,7 +19,7 @@
 #define	MATLEVELS	100		/* how many matrix pushes allowed */
 #define	MAX_LIGHTS	10		/* how many lights allowed */
 
-#define MAX_DEPTH	5
+#define MAX_DEPTH	3
 
 Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint);
 Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint);
