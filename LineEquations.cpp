@@ -3,8 +3,10 @@
 #include "MatrixEquations.h"
 #include <iostream>
 
-void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 
+//Orders Vertices for LEE calculations in Object Order
+void LineEquations::OrderVerts(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList) {
+	//GzCoord temp;
 	float* currentPtr, *nextVal;
 	bool topBottomRelationship = false;
 	float topBottomVal;
@@ -12,16 +14,17 @@ void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 
 	//Order verts by Y
 	for (int i = 0; i < 2; i++) {
-		for (int j = i+1; j < 3; j++) {
+		for (int j = i + 1; j < 3; j++) {
 			currentPtr = (float*)ptr[i];
 			currentPtr++; //set to Y val
 			nextVal = (float*)ptr[j];
 			nextVal++; //Set to yval
 			//If current is larger than nextval, swap
-			
+
 			if (*currentPtr > *nextVal) {
 				std::swap(ptr[i], ptr[j]);
 				std::swap(normalPtr[i], normalPtr[j]);
+				std::swap(uvList[i], uvList[j]);
 			}
 			else if (*currentPtr == *nextVal) {
 				topBottomRelationship = true;
@@ -35,7 +38,7 @@ void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 					}
 				}
 			}
-			
+
 		}
 	}
 
@@ -48,6 +51,7 @@ void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 
 				std::swap(ptr[0], ptr[1]);
 				std::swap(normalPtr[0], normalPtr[1]);
+				std::swap(uvList[0], uvList[1]);
 
 			}
 		}
@@ -58,6 +62,7 @@ void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 
 				std::swap(ptr[1], ptr[2]);
 				std::swap(normalPtr[1], normalPtr[2]);
+				std::swap(uvList[1], uvList[2]);
 
 			}
 		}
@@ -74,10 +79,12 @@ void LineEquations::OrderVerts(GzCoord ptr[3], GzCoord normalPtr[3]) {
 		if (xVal > *currentPtr) {
 			std::swap(ptr[0], ptr[1]);
 			std::swap(normalPtr[0], normalPtr[1]);
+			std::swap(uvList[0], uvList[1]);
 		}
 	}
 
 }
+
 
 //returns line coefficients
 void LineEquations::GetLineCoefficients(float* tailVert, float* headVert, float* returnArray) {
@@ -87,6 +94,7 @@ void LineEquations::GetLineCoefficients(float* tailVert, float* headVert, float*
 	returnArray[2] = (headVert[0] - tailVert[0]) * tailVert[1] - returnArray[0] * tailVert[0]; //C = (dX * Y) - (dY * X)
 }
 
+//LEE, if negative its 'inside' the line, need three evals for a triangle
 bool LineEquations::EvaluatePointByLine(float* lineCoefficients, int x, int y) {
 
 	float val = lineCoefficients[0] * x + lineCoefficients[1] * y + lineCoefficients[2];
@@ -107,17 +115,13 @@ void LineEquations::GetPlaneCoefficients(float* coordOne, float* coordTwo, float
 }
 
 float LineEquations::InterpolateZ(float* coefficients, int x, int y) {
-	float returnVal = (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
-	return returnVal;
-	//return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
+	return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
 }
 
 float LineEquations::InterpolateZFloat(float* coefficients, float x, float y) {
 	if (coefficients[2] == 0) {
 		return 1;
 	}
-	float returnVal = (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
-	return returnVal;
-	//return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
+	return (-1 * (coefficients[0] * x + coefficients[1] * y + coefficients[3]) / coefficients[2]);
 }
 

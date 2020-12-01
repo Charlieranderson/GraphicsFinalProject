@@ -14,9 +14,21 @@ Point Ray::VectorMult(Point x, float t)
 	return temp;
 }
 
-Point Ray::PointAt(float t)
-{
-	Point sum = VectorMult(direction, t);
-	Point temp = { origin.x + sum.x, origin.y + sum.y, origin.z + sum.z };
-	return temp;
+Ray Ray::CalculateRay(float head[3], float origin[3]) {
+	Point Pos, Dir;
+	Pos.x = origin[0];
+	Pos.y = origin[1];
+	Pos.z = origin[2];
+
+	Dir.x = head[0] - origin[0];
+	Dir.y = head[1] - origin[1];
+	Dir.z = head[2] - origin[2];
+
+
+	return Ray(Pos, Dir);
+}
+
+
+float Point::DotProduct(Point a, Point b) {
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }

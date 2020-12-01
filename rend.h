@@ -21,8 +21,7 @@
 
 #define MAX_DEPTH	3
 
-Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint);
-Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint);
+
 class GzRender{			/* define a renderer */
   
 
@@ -47,13 +46,9 @@ public:
 	GzColor		Ka, Kd, Ks;
 	float		    spec;		/* specular power */
 	GzTexture		tex_fun;    /* tex_fun(float u, float v, GzColor color) */
+	GzColor			reflectionCoefficient, refractionCoefficient;	/* Strength of reflection, refraction, between 0, 1*/
+	float			etaRefractionValue;		/*Bend strength of Refraction, between 0,1.5*/
 
-	//GzCoord vert1, vert2, vert3, v1, v2, v3;
-	//GzCoord norm1, norm2, norm3, n1, n2, n3;
-	//GzCoord intersection, minIntersectPoint;
-	//GzCoord edge1, edge2, edge3,C0,C1,C2;
-	//float t;
-	//GzPlane plane;
   	// Constructors
 	GzRender(int xRes, int yRes);
 	~GzRender();
@@ -93,7 +88,7 @@ public:
 	bool CheckBounds(const int &i, const int &j) const;
 	inline void FindPixelsInTri(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList, int* pixels, int &size);
 
-	// Object Translation
+	// Camera Translation
 	int GzRotXMat(float degree, GzMatrix mat);
 	int GzRotYMat(float degree, GzMatrix mat);
 	int GzRotZMat(float degree, GzMatrix mat);
@@ -106,9 +101,8 @@ public:
 	int ConvertTri(GzToken* nameList, GzPointer* valueList); /* Should take tri data, convert to world space, store it as GZ_TRIDATA */
 	bool CheckRay(Ray&, GzCoord, GzTridata&);
 
-	// help function for Camera
-	Ray getRay(GzCoord px, GzCoord cam);
-
 	float FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord intersection, GzPlane &plane);
+	Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint);
+	Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint);
 };
 #endif

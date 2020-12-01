@@ -5,12 +5,15 @@
 
 #include	"math.h"
 
-typedef struct
+ struct Point
 {
 	float x;
 	float y;
 	float z;
-} Point;
+
+	static float DotProduct(Point a, Point b);
+
+} ;
 
 typedef	struct {
 	Point direction;
@@ -41,17 +44,14 @@ public:
 		Normalize(direction);
 	}
 
-
-	//Functions
-	Point getOrigin() { return origin; }
-	Point getDirection(){ return direction; }
-	Point PointAt(float t);
-
 	//Normalizes vector made by point - origin
 	void Normalize(Point input);
 
 	//multiplies vector by scalar 
 	Point VectorMult(Point x, float t); 
+
+	//Calculates a ray 
+	static Ray CalculateRay(float head[3], float origin[3]);
 
 };
 #endif

@@ -16,6 +16,11 @@
 #define GZ_NORMAL               2
 #define GZ_TEXTURE_INDEX        3
 
+#define GZ_REFLECTION		20
+#define GZ_REFRACTION		21
+#define GZ_REFRACTION_BEND		22
+
+
 /* renderer-state default pixel color */
 #define GZ_RGB_COLOR            99	
 

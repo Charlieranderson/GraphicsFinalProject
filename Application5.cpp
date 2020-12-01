@@ -116,14 +116,6 @@ int Application5::Initialize()
 //	0.0,	0.0,	0.0,	1.0 
 //}; 
 
-//	GzMatrix	Xwm = 
-//{ 
-//	0.5,	0.0,	0.0,	-4.0, 
-//	0.0,	0.5,	0.0,	1.5, 
-//	0.0,	0.0,	0.5,	.5, 
-//	0.0,	0.0,	0.0,	1.0 
-//}; 
-
 	GzMatrix	Xwm =
 	{
 		1,	0.0,	0.0,	0,
@@ -162,11 +154,6 @@ int Application5::Initialize()
 	/* Start Renderer */
 	status |= m_pRender->GzBeginRender();
 
-	/* Lights. Should be redefined for world space */
-	//GzLight	light1 = { {-0.7071, 0.7071, 0}, {0.5, 0.5, 0.9} };
-	//GzLight	light2 = { {0, -0.7071, -0.7071}, {0.9, 0.2, 0.3} };
-	//GzLight	light3 = { {0.7071, 0.0, -0.7071}, {0.2, 0.7, 0.3} };
-
 	GzLight	light1 = { {-.4, -0.7, -0.7071}, {0.9, 0.2, 0.3} };
 	GzLight	light2 = { {.4, -0.7, -0.7071}, {0.2, 0.7, 0.3} };
 	GzLight	light3 = { {0, -0.7071, -0.7071}, {0.2, 0.2, 0.7} };
@@ -175,6 +162,12 @@ int Application5::Initialize()
 	GzColor specularCoefficient = { 0.3, 0.3, 0.3 };
 	GzColor ambientCoefficient = { 0,0,0 };
 	GzColor diffuseCoefficient = {0.7, 0.7, 0.7};
+
+	/*Reflection and Refraction*/
+	GzColor kr = { .5, .5, .5 };
+	GzColor kt = { .3, .3, .3 };
+	float eta = 1;
+
 
 /* 
   renderer is ready for frame --- define lights and shader at start of frame 
@@ -223,7 +216,14 @@ int Application5::Initialize()
         //valueListShader[5] = (GzPointer)(ptex_fun);	/* or use ptex_fun */
         valueListShader[5] = (GzPointer)(tex_fun);	/* or use ptex_fun */
 #endif
-        status |= m_pRender->GzPutAttribute(6, nameListShader, valueListShader);
+	
+		nameListShader[6] = GZ_REFLECTION;
+		valueListShader[6] = (GzPointer)kr;
+		nameListShader[7] = GZ_REFRACTION;
+		valueListShader[7] = (GzPointer)kt;
+		nameListShader[8] = GZ_REFRACTION_BEND;
+		valueListShader[8] = (GzPointer)&eta;
+        status |= m_pRender->GzPutAttribute(9, nameListShader, valueListShader);
 
 	//Vert stack
 	//status |= m_pRender->GzPushMatrix(scale, m_pRender->Ximage, m_pRender->matlevel, false);  

@@ -9,9 +9,51 @@
 
 #define PI (float) 3.14159265358979323846
 
+//HELPER FUNCTIONS
+
 inline float ConvertToRadians(float degree) {
 	return degree * (PI / 180.0);
 }
+
+
+float DProduct(GzCoord a, GzCoord b)
+{
+	return (a[X] * b[X]) + (a[Y] * b[Y]) + (a[Z] * b[Z]);
+}
+
+bool crossProduct(const GzCoord v1, const GzCoord v2, GzCoord result)
+{
+	if (v1 == NULL || v2 == NULL)
+		return false;
+
+	if (result == NULL)
+		return false;
+
+	// X = (Y x Z) = i (Yy Zz - Yz Zy) + j (Yz Zx - Yx Zz) + k (Yx Zy - Yy Zx) 
+	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
+	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
+	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
+
+	return true;
+}
+
+void cp(GzCoord v1, GzCoord v2, GzCoord result)
+{
+	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
+	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
+	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
+}
+float vecMagnitude(GzCoord v)
+{
+	return sqrt(pow(v[X], 2) + pow(v[Y], 2) + pow(v[Z], 2));
+}
+
+bool within01Range(float v)
+{
+	return (0 <= v && v <= 1);
+}
+
+//Camera Rotations
 
 int GzRender::GzRotXMat(float degree, GzMatrix mat)
 {
@@ -133,7 +175,6 @@ int GzRender::GzTrxMat(GzCoord translate, GzMatrix mat)
 	return GZ_SUCCESS;
 }
 
-
 int GzRender::GzScaleMat(GzCoord scale, GzMatrix mat)
 {
 	/* HW 3.5
@@ -185,21 +226,22 @@ int GzRender::GzDefaultCamera() {
 
 GzRender::GzRender(int xRes, int yRes) : xres(xRes), yres(yRes)
 {
-	/* HW1.1 create a framebuffer for MS Windows display:
-	 -- set display resolution
-	 -- allocate memory for framebuffer : 3 bytes(b, g, r) x width x height
-	 -- allocate memory for pixel buffer
-	 */
+	//Allocate framebuffer memory
 	framebuffer = new char[xRes*yRes * 3];
 	pixelbuffer = new GzPixel[xRes * yRes]; //Allocate Pixelbuffer memory
-	//tribuffer = new Gz_Tridata[???] //Allocate tri memory
 
+	//Initialize variables
 
-/* HW 3.6
-- setup Xsp and anything only done once
-- init default camera
-*/
-//Initialize variables
+	reflectionCoefficient[RED] = .5;
+	reflectionCoefficient[GREEN] = .5;
+	reflectionCoefficient[BLUE] = .5;
+
+	refractionCoefficient[RED] = .3;
+	refractionCoefficient[GREEN] = .3;
+	refractionCoefficient[BLUE] = .3;
+
+	etaRefractionValue = 1; //Transparent
+
 	matlevel = 0;
 	normMatLevel = 0;
 	numlights = 0;
@@ -274,10 +316,9 @@ void ComputeXwi(GzMatrix target, GzCamera &cam) {
 //Initialize renderer
 int GzRender::GzBeginRender()
 {
-	
+
 	//Computes Xwi, stored in GzRender class
 	ComputeXwi(Xwi, m_camera);
-	//Need to store and convert lights, camera, etc
 
 	return GZ_SUCCESS;
 }
@@ -373,7 +414,6 @@ int GzRender::GzGet(int i, int j, GzIntensity *r, GzIntensity *g, GzIntensity *b
 	}
 	return GZ_SUCCESS;
 }
-
 
 int GzRender::GzFlushDisplay2File(FILE* outfile)
 {
@@ -498,57 +538,79 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 			spec = *distCE;
 		}
 		break;
-		
+
 		case GZ_TEXTURE_MAP:
 		{
-			tex_fun = (GzTexture) valueList[i];
+			tex_fun = (GzTexture)valueList[i];
+		}
+		break;
+
+		case GZ_REFLECTION:
+		{
+			float* newKrValue = (float*)valueList[i];
+			reflectionCoefficient[0] = newKrValue[0] < 0 ? 0 : newKrValue[0];
+			reflectionCoefficient[1] = newKrValue[1] < 0 ? 0 : newKrValue[1];
+			reflectionCoefficient[2] = newKrValue[2] < 0 ? 0 : newKrValue[2];
+			MatrixEquations::NormalizeVectorThree(reflectionCoefficient);
+		}
+		break;
+		case GZ_REFRACTION:
+		{
+			float* newKtValue = (float*)valueList[i];
+			refractionCoefficient[0] = newKtValue[0] < 0 ? 0 : newKtValue[0];
+			refractionCoefficient[1] = newKtValue[1] < 0 ? 0 : newKtValue[1];
+			refractionCoefficient[2] = newKtValue[2] < 0 ? 0 : newKtValue[2];
+			MatrixEquations::NormalizeVectorThree(refractionCoefficient);
+		}
+		break;
+		case GZ_REFRACTION_BEND:
+		{
+			etaRefractionValue = *(float*)valueList[i];
+			etaRefractionValue = etaRefractionValue < 0 ? 0 : etaRefractionValue; //Clamp
+			etaRefractionValue = etaRefractionValue > 1.5 ? 1.5 : etaRefractionValue;
 		}
 		break;
 		}
-
 	}
-
 	return GZ_SUCCESS;
 }
 
-/*EXAMPLE ON HOW TO USE LEE IN THIS CODE
-*/
 void GzRender::FindPixelsInTri(GzCoord* ptr, GzCoord* normalPtr, GzTextureIndex* uvList, int* pixels, int &size) {
 
 	//Sort verts
-	//LineEquations::OrderVerts(ptr, normalPtr, uvList); //Normals added to keep in sync
+	LineEquations::OrderVerts(ptr, normalPtr, uvList); //Normals added to keep in sync
 
-	////LR evaluation here.
-	////Line data:
-	//float* tail = (float*)ptr;
-	//float* head = (float*)(ptr + 1);
-	//float coefficients[3];
-	//float coefficientsTwo[3];
-	//float coefficientsThree[3];
-	//LineEquations::GetLineCoefficients(tail, head, coefficients);
-	//tail = head;
-	//head = (float*)(ptr + 2);
-	//LineEquations::GetLineCoefficients(tail, head, coefficientsTwo);
-	//tail = head;
-	//head = (float*)ptr;
-	//LineEquations::GetLineCoefficients(tail, head, coefficientsThree);
-	//int curIndex = 0;
-	//int x, y;
+	//LR evaluation here.
+	//Line data:
+	float* tail = (float*)ptr;
+	float* head = (float*)(ptr + 1);
+	float coefficients[3];
+	float coefficientsTwo[3];
+	float coefficientsThree[3];
+	LineEquations::GetLineCoefficients(tail, head, coefficients);
+	tail = head;
+	head = (float*)(ptr + 2);
+	LineEquations::GetLineCoefficients(tail, head, coefficientsTwo);
+	tail = head;
+	head = (float*)ptr;
+	LineEquations::GetLineCoefficients(tail, head, coefficientsThree);
+	int curIndex = 0;
+	int x, y;
 
-	////DOESN'T INCLUDE ON THE LINE PIXEL EDGE CASE, ADD LATER
-	//for (int i = 0; i < size; i++) {
-	//	x = pixels[i] % yres;
-	//	y = pixels[i] / xres;
-	//	if (LineEquations::EvaluatePointByLine(coefficients, x, y)
-	//		&& LineEquations::EvaluatePointByLine(coefficientsTwo, x, y)
-	//		&& LineEquations::EvaluatePointByLine(coefficientsThree, x, y))
-	//	{
-	//		pixels[curIndex] = pixels[i];
-	//		curIndex++;
-	//	}
-	//}
+	//DOESN'T INCLUDE ON THE LINE PIXEL EDGE CASE, ADD LATER
+	for (int i = 0; i < size; i++) {
+		x = pixels[i] % yres;
+		y = pixels[i] / xres;
+		if (LineEquations::EvaluatePointByLine(coefficients, x, y)
+			&& LineEquations::EvaluatePointByLine(coefficientsTwo, x, y)
+			&& LineEquations::EvaluatePointByLine(coefficientsThree, x, y))
+		{
+			pixels[curIndex] = pixels[i];
+			curIndex++;
+		}
+	}
 
-	//size = curIndex; //Set new size
+	size = curIndex; //Set new size
 }
 
 void GzRender::CalculateColor(float normal[3], float returnColor[3]) {
@@ -867,46 +929,6 @@ void GetNormalCoefficients(GzCoord vertA, GzCoord vertB, GzCoord vertC, GzCoord 
 	LineEquations::GetPlaneCoefficients(normalZOne, normalZTwo, normalZThree, zValueCoefficients);
 }
 
-float dotProduct(Point a, Point b)
-{
-	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
-float DProduct(GzCoord a, GzCoord b)
-{
-	return (a[X] * b[X]) + (a[Y] * b[Y]) + (a[Z] * b[Z]);
-}
-
-bool crossProduct(const GzCoord v1, const GzCoord v2, GzCoord result)
-{
-	if (v1 == NULL || v2 == NULL)
-		return false;
-
-	if (result == NULL)
-		return false;
-
-	// X = (Y x Z) = i (Yy Zz - Yz Zy) + j (Yz Zx - Yx Zz) + k (Yx Zy - Yy Zx) 
-	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
-	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
-	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
-
-	return true;
-}
-void cp(GzCoord v1, GzCoord v2, GzCoord result)
-{
-	result[X] = ((v1[Y] * v2[Z]) - (v1[Z] * v2[Y]));
-	result[Y] = ((v1[Z] * v2[X]) - (v1[X] * v2[Z]));
-	result[Z] = ((v1[X] * v2[Y]) - (v1[Y] * v2[X]));
-}
-float vecMagnitude(GzCoord v)
-{
-	return sqrt(pow(v[X], 2) + pow(v[Y], 2) + pow(v[Z], 2));
-}
-
-bool within01Range(float v)
-{
-	return (0 <= v && v <= 1);
-}
-
 
 void GzRender::CalculatePhongColor(float intersectionPoint[3], float normal[3], float returnColor[3], float newKd[3], float newKa[3]) {
 
@@ -992,7 +1014,7 @@ void GzRender::CalculatePhongColor(float intersectionPoint[3], float normal[3], 
 }
 
 
-//RAYTRACING CONTENT STARTING HERE. Comments in rend.h
+//RAYTRACING, Comments in rend.h
 
 int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 {
@@ -1035,7 +1057,7 @@ int GzRender::ConvertTri(GzToken* nameList, GzPointer* valueList)
 	return GZ_SUCCESS;
 }
 
-
+//Converts pixel coordinates from screen to world space
 void GzRender::ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel) {
 
 	float imageAspectRatio = xres / yres;
@@ -1045,7 +1067,7 @@ void GzRender::ConvertPixelToWorldSpace(int x, int y, GzCoord worldSpacePixel) {
 	worldSpacePixel[2] = -1;
 }
 
-
+//Calculates ray and triangle plane intersections. Not necessarily inside triangle.
 float GzRender::FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord vert2, GzCoord returnIntersection, GzPlane &plane)
 {
 	float t;
@@ -1060,8 +1082,8 @@ float GzRender::FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord 
 	float d = plane.d;               // constant term of plane
 
 	// dot products
-	float dot1 = dotProduct(n, ray.direction);             // a*Vx + b*Vy + c*Vz
-	float dot2 = dotProduct(n, ray.origin);             // a*x1 + b*y1 + c*z1
+	float dot1 = Point::DotProduct(n, ray.direction);             // a*Vx + b*Vy + c*Vz
+	float dot2 = Point::DotProduct(n, ray.origin);             // a*x1 + b*y1 + c*z1
 
 	// if denominator=0, no intersect
 	if (dot1 == 0)
@@ -1078,7 +1100,7 @@ float GzRender::FindIntersection(Ray ray, GzCoord vert0, GzCoord vert1, GzCoord 
 	return t;
 }
 
-
+//Checks if Ray intersection point is inside triangle 
 bool GzRender::CheckRay(Ray &ray, GzCoord minIntersectionPoint, GzTridata &intersectedTriangle) {
 
 	float smallestTValue = INT_MAX;
@@ -1167,7 +1189,6 @@ bool GzRender::CheckRay(Ray &ray, GzCoord minIntersectionPoint, GzTridata &inter
 
 }
 
-
 void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) {
 
 	GzCoord minIntersectionPoint;
@@ -1181,7 +1202,7 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 	if (intersection)
 	{
 
-			//Recursively search for rays and reflection/refraction ray
+		//Recursively search for rays and reflection/refraction ray
 		Ray reflec, refrac;
 		GzColor spec, diff;
 		spec[0] = 0;
@@ -1191,19 +1212,6 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 		diff[0] = 0;
 		diff[1] = 0;
 		diff[2] = 0;
-
-		GzColor Kr, Kt;
-		//Kr[RED] = 0.3;
-		//Kr[GREEN] = 0.3;
-		//Kr[BLUE] = 0.3;
-		Kr[RED] = .5;
-		Kr[GREEN] = .5;
-		Kr[BLUE] = .5;
-
-		Kt[RED] = .3;
-		Kt[GREEN] = .3;
-		Kt[BLUE] = .3;
-		
 
 		float xValueCoefficients[4];
 		float yValueCoefficients[4];
@@ -1223,14 +1231,14 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 			normal[2] = 0;
 		}
 		CalculatePhongColor(minIntersectionPoint, normal, intensity, Kd, Ka);
-		if (Kr[RED] > 0 || Kr[BLUE] > 0 || Kr[GREEN] > 0)
+		if (reflectionCoefficient[RED] > 0 || reflectionCoefficient[BLUE] > 0 || reflectionCoefficient[GREEN] > 0)
 		{
 			reflec = GetReflection(ray, normal, minIntersectionPoint);
 
 			if (depth <= MAX_DEPTH) {
 				CalculateColorRaytrace(reflec, depth + 1, spec);
 				for (int i = 0; i < 3; ++i) {
-					spec[i] *= Kr[i] / depth;
+					spec[i] *= reflectionCoefficient[i] / depth;
 				}
 			}
 			else {
@@ -1240,14 +1248,14 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 			}
 		}
 
-		if (Kt[RED] > 0 || Kt[BLUE] > 0 || Kt[GREEN] > 0)
+		if (refractionCoefficient[RED] > 0 || refractionCoefficient[BLUE] > 0 || refractionCoefficient[GREEN] > 0)
 		{
 			refrac = GetRefraction(ray, normal, minIntersectionPoint);
 
 			if (depth <= MAX_DEPTH) {
 				CalculateColorRaytrace(refrac, depth + 1, diff);
 				for (int i = 0; i < 3; ++i) {
-					diff[i] *= Kt[i] / depth;
+					diff[i] *= refractionCoefficient[i] / depth;
 				}
 			}
 			else {
@@ -1276,7 +1284,7 @@ void GzRender::CalculateColorRaytrace(Ray ray, int depth, float returnColor[3]) 
 
 }
 
-Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint)
+Ray GzRender::GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint)
 {
 	Point new_origin;
 	Point new_dir;
@@ -1285,7 +1293,7 @@ Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint)
 	normal_.x = normal[0];
 	normal_.y = normal[1];
 	normal_.z = normal[2];
-	RdotN = dotProduct(normal_, ray.direction);
+	RdotN = Point::DotProduct(normal_, ray.direction);
 	if (RdotN > 0) {
 		for (int i = 0; i < 3; ++i)
 			normal[i] *= -1;
@@ -1301,7 +1309,7 @@ Ray GetReflection(Ray &ray, GzCoord normal, GzCoord hitPoint)
 	return Ray(new_origin, new_dir);
 }
 
-Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint)
+Ray GzRender::GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint)
 {
 	Point new_origin = { 0, 0, 0 };
 	Point new_dir = { 0, 0, 0 };
@@ -1310,13 +1318,11 @@ Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint)
 	normal_.y = normal[1];
 	normal_.z = normal[2];
 
-	float eta = .9;
-	float cosi = dotProduct(normal_, ray.direction);
-	//float o = (i * eta - n * (-cosi + eta * cosi));
+	float cosi = Point::DotProduct(normal_, ray.direction);
 
-	new_dir.x = eta * ray.direction.x - ((-cosi + eta * cosi) * normal_.x);
-	new_dir.y = eta * ray.direction.y - ((-cosi + eta * cosi) * normal_.y);
-	new_dir.z = eta * ray.direction.z - ((-cosi + eta * cosi) * normal_.z);
+	new_dir.x = etaRefractionValue * ray.direction.x - ((-cosi + etaRefractionValue * cosi) * normal_.x);
+	new_dir.y = etaRefractionValue * ray.direction.y - ((-cosi + etaRefractionValue * cosi) * normal_.y);
+	new_dir.z = etaRefractionValue * ray.direction.z - ((-cosi + etaRefractionValue * cosi) * normal_.z);
 	
 	new_origin.x = hitPoint[X];
 	new_origin.y = hitPoint[Y];
@@ -1326,12 +1332,10 @@ Ray GetRefraction(Ray &ray, GzCoord normal, GzCoord hitPoint)
 	
 }
 
+//Main render function
 int GzRender::RenderImg() {
 
-	//for every px
-		//intersection = Raycast();
-		//Calculate color at loc
-		//Write to pixelbuffer
+	//Iterate through every pixel
 	for(int i = 0; i < xres * yres; i++){
 
 			int x = i / xres;
@@ -1340,34 +1344,22 @@ int GzRender::RenderImg() {
 			ConvertPixelToWorldSpace(x, y, worldSpacePixel); //World space pixel
 
 			float origin[3] = { m_camera.position[0], m_camera.position[1], m_camera.position[2] };
+
+			//Apply camera translations for new view perspectives
 			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, worldSpacePixel);
 			MatrixEquations::MatrixVectorMult(m_camera.CameraTranslation, origin);
 
-			Ray ray = getRay(worldSpacePixel, origin);
+			//Create Ray
+			Ray ray = Ray::CalculateRay(worldSpacePixel, origin);
 
 			GzColor color = { 0,0,0 };
+			//Calculate intersections and color at point
 			CalculateColorRaytrace(ray, 1, color);
+
+			//Put color in framebuffer for that pixel
 			GzPut(x, y, ctoi(color[RED]), ctoi(color[GREEN]), ctoi(color[BLUE]), 1, 0);
 	
-		
 	}
 
 	return GZ_SUCCESS;
-}
-
-
-Ray GzRender::getRay(GzCoord worldSpacePixel, GzCoord origin)
-{
-	Point Pos, Dir;
-	Pos.x = origin[0];
-	Pos.y = origin[1];
-	Pos.z = origin[2];
-
-	Dir.x = worldSpacePixel[X] - origin[X];
-	Dir.y = worldSpacePixel[Y] - origin[Y];
-	Dir.z = worldSpacePixel[Z] - origin[Z];
-
-
-	return Ray(Pos, Dir);
-
 }
